@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Sri Sai Home Foods - Premium Food Business & Profit Hub</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+            },
+            accent: {
+              500: '#f59e0b',
+              600: '#d97706',
+            }
+          },
+          fontFamily: {
+            tamil: ['"Noto Sans Tamil"', 'sans-serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Tamil:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- React & ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Recharts -->
+  <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
+  <script src="https://unpkg.com/recharts@2.10.3/umd/Recharts.js"></script>
+
+  <!-- html2canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      color: #f8fafc;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .lang-ta {
+      font-family: 'Noto Sans Tamil', 'Inter', sans-serif !important;
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+    }
+    .glass-card-light {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    }
+    .glow-accent {
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="selection:bg-emerald-500 selection:text-white">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, useRef, useCallback } = React;
+    const { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } = window.Recharts;
+
+    const TRANSLATIONS = {
+      en: {
+        appName: "Sri Sai Home Foods",
+        tagline: "Premium Idiyappam & Profit Hub",
+        navDashboard: "Dashboard",
+        navOrders: "Order Entry",
+        navChecklist: "Checklist",
+        navPayments: "Collections",
+        navExpenses: "Expenses & Profit",
+        navCustomers: "Shops",
+        navBills: "Bills & Invoices",
+        navReports: "Reports",
+        navBackup: "Backup",
+        navSettings: "Settings",
+        morning: "Morning",
+        evening: "Evening",
+        today: "Today",
+        yesterday: "Yesterday",
+        thisMonth: "This Month",
+        date: "Date",
+        shift: "Shift",
+        pieces: "Pieces",
+        rate: "Rate",
+        amount: "Amount",
+        status: "Status",
+        save: "Save",
+        cancel: "Cancel",
+        edit: "Edit",
+        delete: "Delete",
+        search: "Search shop name...",
+        all: "All Shops",
+        delivered: "Delivered",
+        pending: "Pending",
+        tuesdayNotice: "Tuesday Half-Day: Evening shift is disabled.",
+        kpiTodayPieces: "Today's Pieces",
+        kpiTodayRevenue: "Today's Revenue",
+        kpiTotalOutstanding: "Total Dues",
+        kpiCollectedMonth: "Collected (Month)",
+        netProfitHeading: "NET PROFIT IN HAND",
+        totalRevenue: "Total Revenue",
+        totalExpenses: "Total Expenses",
+        rapidoCost: "Rapido / Porter Fee (₹)",
+        privacyOn: "Numbers Visible",
+        privacyOff: "Confidential Mode",
+        shopProfitFilter: "Filter Profit by Shop",
+        catOthers: "Others / Misc Expenses",
+      },
+      ta: {
+        appName: "ஸ்ரீ சாய் ஹோம் ஃபுட்ஸ்",
+        tagline: "இடியாப்ப விநியோகம் & உண்மை லாபக் கணக்கு",
+        navDashboard: "முகப்பு",
+        navOrders: "ஆர்டர் பதிவு",
+        navChecklist: "விநியோக பட்டியல்",
+        navPayments: "வசூல்",
+        navExpenses: "செலவு & லாபம்",
+        navCustomers: "கடைகள்",
+        navBills: "பில் & ரசீது",
+        navReports: "அறிக்கைகள்",
+        navBackup: "பேக்கப்",
+        navSettings: "அமைப்புகள்",
+        morning: "காலை",
+        evening: "மாலை",
+        today: "இன்று",
+        yesterday: "நேற்று",
+        thisMonth: "இந்த மாதம்",
+        date: "தேதி",
+        shift: "வேளை",
+        pieces: "துண்டுகள்",
+        rate: "விலை",
+        amount: "தொகை",
+        status: "நிலை",
+        save: "சேமி",
+        cancel: "ரத்து",
+        edit: "திருத்து",
+        delete: "நீக்கு",
+        search: "தேடுக...",
+        all: "அனைத்து கடைகளும்",
+        delivered: "வழங்கப்பட்டது",
+        pending: "நிலுவையில்",
+        tuesdayNotice: "செவ்வாய் அரை நாள் மட்டுமே. மாலை வேளை இல்லை.",
+        kpiTodayPieces: "இன்றைய இடியாப்பம்",
+        kpiTodayRevenue: "இன்றைய வருமானம்",
+        kpiTotalOutstanding: "மொத்த பாக்கி",
+        kpiCollectedMonth: "இந்த மாத வசூல்",
+        netProfitHeading: "உண்மை லாபம் (NET PROFIT)",
+        totalRevenue: "மொத்த வருமானம்",
+        totalExpenses: "மொத்த செலவு",
+        rapidoCost: "ராபிடோ டெலிவரி கட்டணம் (₹)",
+        privacyOn: "எண்கள் தெரியும்",
+        privacyOff: "ரகசிய முறை",
+        shopProfitFilter: "கடை வாரியாக லாபம்",
+        catOthers: "இதர செலவுகள்",
+      }
+    };
+
+    const formatINR = (val, hidePrivacy = false) => {
+      if (hidePrivacy) return '••••••';
+      const num = Math.round(Number(val) || 0);
+      const isNeg = num < 0;
+      const absStr = Math.abs(num).toString();
+      let lastThree = absStr.substring(absStr.length - 3);
+      const otherNumbers = absStr.substring(0, absStr.length - 3);
+      if (otherNumbers !== '') lastThree = ',' + lastThree;
+      const res = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + lastThree;
+      return `${isNeg ? '-₹' : '₹'}${res}`;
+    };
+
+    const formatDateDDMMYYYY = (isoDate) => {
+      if (!isoDate) return '';
+      const parts = isoDate.split('-');
+      return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : isoDate;
+    };
+
+    const getTodayISO = () => new Date().toISOString().split('T')[0];
+    const isTuesday = (dateStr) => dateStr && new Date(dateStr + 'T00:00:00').getDay() === 2;
+
+    const SEED_CUSTOMERS = [
+      { id: 'cust-1', name: 'Annapoorna Mess', type: 'hotel', ownerName: 'Muthu Kumar', ownerPhone: '9842100001', address: '12 Main Rd, Bus Stand', unitRate: 7, defaultMorningQty: 150, defaultEveningQty: 100, isActive: true },
+      { id: 'cust-2', name: 'Hotel Saravana Bhavan', type: 'restaurant', ownerName: 'Ramasamy', ownerPhone: '9842100002', address: '45 South Car St', unitRate: 6, defaultMorningQty: 300, defaultEveningQty: 250, isActive: true },
+      { id: 'cust-3', name: 'Sri Vigneswara Catering', type: 'catering', ownerName: 'Senthil Nathan', ownerPhone: '9842100003', address: '8 Temple Rd', unitRate: 7, defaultMorningQty: 200, defaultEveningQty: 0, isActive: true },
+      { id: 'cust-4', name: 'Murugan Tiffin Room', type: 'restaurant', ownerName: 'Murugan', ownerPhone: '9842100004', address: '88 Bazaar St', unitRate: 6, defaultMorningQty: 120, defaultEveningQty: 120, isActive: true },
+    ];
+
+    const Storage = {
+      init() {
+        if (!localStorage.getItem('srisai_cust_v3')) {
+          localStorage.setItem('srisai_cust_v3', JSON.stringify(SEED_CUSTOMERS));
+          const today = getTodayISO();
+          const sampleOrders = [
+            { id: `ord-m-${today}-cust-1`, customerId: 'cust-1', date: today, shift: 'morning', pieces: 150, unitRateApplied: 7, amount: 1050, deliveryStatus: 'delivered', porterCost: 40 },
+            { id: `ord-m-${today}-cust-2`, customerId: 'cust-2', date: today, shift: 'morning', pieces: 300, unitRateApplied: 6, amount: 1800, deliveryStatus: 'delivered', porterCost: 60 },
+          ];
+          const samplePayments = [
+            { id: `pay-${today}-1`, customerId: 'cust-1', date: today, amount: 1050, mode: 'upi', reference: 'UPI9842', recordedAt: new Date().toISOString() }
+          ];
+          const sampleExpenses = [
+            { id: `exp-${today}-1`, date: today, category: 'Rice Flour / அரிசி மாவு', amount: 800, mode: 'cash', note: 'Flour 1 Bag', customerId: '' },
+            { id: `exp-${today}-2`, date: today, category: 'Others / Misc Expenses', amount: 150, mode: 'cash', note: 'Packaging bags', customerId: '' }
+          ];
+          localStorage.setItem('srisai_ord_v3', JSON.stringify(sampleOrders));
+          localStorage.setItem('srisai_pay_v3', JSON.stringify(samplePayments));
+          localStorage.setItem('srisai_exp_v3', JSON.stringify(sampleExpenses));
+          localStorage.setItem('srisai_set_v3', JSON.stringify({ businessName: 'Sri Sai Home Foods', businessPhone: '9842100000', upiId: 'srisai@upi', language: 'en' }));
+        }
+      },
+      getCustomers() { return JSON.parse(localStorage.getItem('srisai_cust_v3') || '[]'); },
+      saveCustomers(d) { localStorage.setItem('srisai_cust_v3', JSON.stringify(d)); },
+      getOrders() { return JSON.parse(localStorage.getItem('srisai_ord_v3') || '[]'); },
+      saveOrders(d) { localStorage.setItem('srisai_ord_v3', JSON.stringify(d)); },
+      getPayments() { return JSON.parse(localStorage.getItem('srisai_pay_v3') || '[]'); },
+      savePayments(d) { localStorage.setItem('srisai_pay_v3', JSON.stringify(d)); },
+      getExpenses() { return JSON.parse(localStorage.getItem('srisai_exp_v3') || '[]'); },
+      saveExpenses(d) { localStorage.setItem('srisai_exp_v3', JSON.stringify(d)); },
+      getSettings() { return JSON.parse(localStorage.getItem('srisai_set_v3') || '{}'); },
+      saveSettings(d) { localStorage.setItem('srisai_set_v3', JSON.stringify(d)); }
+    };
+
+    Storage.init();
+
+    function App() {
+      const [customers, setCustomers] = useState([]);
+      const [orders, setOrders] = useState([]);
+      const [payments, setPayments] = useState([]);
+      const [expenses, setExpenses] = useState([]);
+      const [settings, setSettings] = useState({});
+      const [lang, setLang] = useState('en');
+      const [activeTab, setActiveTab] = useState('dashboard');
+      const [hidePrivacy, setHidePrivacy] = useState(false);
+      const [toastMsg, setToastMsg] = useState(null);
+
+      const refreshAllData = useCallback(() => {
+        setCustomers(Storage.getCustomers());
+        setOrders(Storage.getOrders());
+        setPayments(Storage.getPayments());
+        setExpenses(Storage.getExpenses());
+        const sets = Storage.getSettings();
+        setSettings(sets);
+        if (sets.language) setLang(sets.language);
+      }, []);
+
+      useEffect(() => { refreshAllData(); }, [refreshAllData]);
+
+      const showToast = (msg) => {
+        setToastMsg(msg);
+        setTimeout(() => setToastMsg(null), 3000);
+      };
+
+      const t = useCallback((key) => {
+        return (TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) || TRANSLATIONS['en'][key] || key;
+      }, [lang]);
+
+      const customerBalances = useMemo(() => {
+        const map = {};
+        customers.forEach(c => map[c.id] = { id: c.id, name: c.name, phone: c.ownerPhone, totalBilled: 0, totalPaid: 0, balance: 0 });
+        orders.filter(o => o.deliveryStatus === 'delivered').forEach(o => { if (map[o.customerId]) map[o.customerId].totalBilled += (o.amount || 0); });
+        payments.forEach(p => { if (map[p.customerId]) map[p.customerId].totalPaid += (p.amount || 0); });
+        Object.keys(map).forEach(id => { map[id].balance = map[id].totalBilled - map[id].totalPaid; });
+        return map;
+      }, [customers, orders, payments]);
+
+      const totalOutstandingAll = useMemo(() => {
+        return Object.values(customerBalances).reduce((sum, item) => sum + item.balance, 0);
+      }, [customerBalances]);
+
+      return (
+        <div className={`min-h-screen flex flex-col pb-24 md:pb-0 ${lang === 'ta' ? 'lang-ta' : ''}`}>
+          
+          {/* Header Bar */}
+          <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 text-white shadow-xl">
+            <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('dashboard')}>
+                <div className="bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 font-black rounded-2xl w-10 h-10 flex items-center justify-center text-xl shadow-lg glow-accent">
+                  SS
+                </div>
+                <div>
+                  <h1 className="font-extrabold text-base sm:text-lg leading-tight tracking-wide">{t('appName')}</h1>
+                  <p className="text-[11px] text-slate-400 font-medium hidden sm:block">{t('tagline')}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                {/* Confidentiality Privacy Toggle */}
+                <button 
+                  onClick={() => setHidePrivacy(!hidePrivacy)} 
+                  className={`p-2 rounded-xl border text-xs font-bold transition flex items-center space-x-1 ${
+                    hidePrivacy ? 'bg-amber-500/20 border-amber-500 text-amber-400' : 'bg-slate-800 border-slate-700 text-slate-300'
+                  }`}>
+                  <span>{hidePrivacy ? '🙈' : '👁️'}</span>
+                  <span className="hidden sm:inline">{hidePrivacy ? t('privacyOff') : t('privacyOn')}</span>
+                </button>
+
+                {/* Language Switch */}
+                <div className="bg-slate-800 p-1 rounded-xl flex border border-slate-700 text-xs font-bold">
+                  <button onClick={() => setLang('en')} className={`px-2.5 py-1 rounded-lg ${lang === 'en' ? 'bg-emerald-500 text-slate-950 font-extrabold' : 'text-slate-400'}`}>EN</button>
+                  <button onClick={() => setLang('ta')} className={`px-2.5 py-1 rounded-lg ${lang === 'ta' ? 'bg-emerald-500 text-slate-950 font-extrabold' : 'text-slate-400'}`}>தமிழ்</button>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* Toast */}
+          {toastMsg && (
+            <div className="fixed top-16 right-4 z-50 bg-emerald-500 text-slate-950 font-extrabold px-4 py-2.5 rounded-2xl shadow-2xl flex items-center space-x-2 text-xs">
+              <span>✅</span><span>{toastMsg}</span>
+            </div>
+          )}
+
+          {/* Navigation Bar Desktop */}
+          <nav className="bg-slate-900/60 border-b border-slate-800/80 hidden md:block">
+            <div className="max-w-7xl mx-auto px-4 flex space-x-1 py-1.5 overflow-x-auto">
+              {[
+                { id: 'dashboard', label: t('navDashboard'), icon: '📊' },
+                { id: 'orders', label: t('navOrders'), icon: '📝' },
+                { id: 'checklist', label: t('navChecklist'), icon: '✅' },
+                { id: 'payments', label: t('navPayments'), icon: '💰' },
+                { id: 'expenses', label: t('navExpenses'), icon: '📈' },
+                { id: 'bills', label: t('navBills'), icon: '🧾' },
+                { id: 'customers', label: t('navCustomers'), icon: '🏪' },
+                { id: 'reports', label: t('navReports'), icon: '📉' },
+                { id: 'backup', label: t('navBackup'), icon: '💾' },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center space-x-2 px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all ${
+                    activeTab === tab.id ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                  }`}>
+                  <span>{tab.icon}</span><span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+          </nav>
+
+          {/* Main View Router */}
+          <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-5">
+            {activeTab === 'dashboard' && <DashboardView customers={customers} orders={orders} payments={payments} expenses={expenses} customerBalances={customerBalances} totalOutstandingAll={totalOutstandingAll} hidePrivacy={hidePrivacy} t={t} setActiveTab={setActiveTab} />}
+            {activeTab === 'orders' && <OrderEntryView customers={customers} orders={orders} setOrders={setOrders} t={t} showToast={showToast} refreshAllData={refreshAllData} />}
+            {activeTab === 'checklist' && <ChecklistView customers={customers} orders={orders} setOrders={setOrders} t={t} showToast={showToast} refreshAllData={refreshAllData} />}
+            {activeTab === 'payments' && <CustomerCollectionsView customers={customers} orders={orders} payments={payments} setPayments={setPayments} customerBalances={customerBalances} totalOutstandingAll={totalOutstandingAll} hidePrivacy={hidePrivacy} t={t} showToast={showToast} refreshAllData={refreshAllData} />}
+            {activeTab === 'expenses' && <ExpensesProfitView customers={customers} orders={orders} expenses={expenses} setExpenses={setExpenses} hidePrivacy={hidePrivacy} t={t} showToast={showToast} refreshAllData={refreshAllData} />}
+            {activeTab === 'bills' && <BillsView customers={customers} orders={orders} payments={payments} settings={settings} t={t} />}
+            {activeTab === 'customers' && <CustomersView customers={customers} setCustomers={setCustomers} orders={orders} payments={payments} expenses={expenses} customerBalances={customerBalances} t={t} showToast={showToast} refreshAllData={refreshAllData} />}
+            {activeTab === 'reports' && <ReportsView customers={customers} orders={orders} payments={payments} t={t} />}
+            {activeTab === 'backup' && <BackupView customers={customers} orders={orders} payments={payments} expenses={expenses} settings={settings} refreshAllData={refreshAllData} t={t} showToast={showToast} />}
+          </main>
+
+          {/* Mobile Bottom Glossy Floating Bar */}
+          <nav className="md:hidden fixed bottom-3 left-3 right-3 bg-slate-900/90 backdrop-blur-xl border border-slate-700/80 z-40 p-1.5 rounded-3xl shadow-2xl flex justify-around items-center">
+            {[
+              { id: 'dashboard', label: t('navDashboard'), icon: '📊' },
+              { id: 'orders', label: t('navOrders'), icon: '📝' },
+              { id: 'checklist', label: t('navChecklist'), icon: '✅' },
+              { id: 'payments', label: t('navPayments'), icon: '💰' },
+              { id: 'expenses', label: t('navExpenses'), icon: '📈' },
+              { id: 'bills', label: t('navBills'), icon: '🧾' },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex flex-col items-center justify-center py-1 px-2 rounded-2xl transition-all w-full ${
+                  activeTab === tab.id ? 'bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 font-extrabold shadow-md' : 'text-slate-400'
+                }`}>
+                <span className="text-base">{tab.icon}</span>
+                <span className="text-[9px] font-extrabold mt-0.5 truncate">{tab.label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+      );
+    }
+
+    function DashboardView({ customers, orders, payments, expenses, customerBalances, totalOutstandingAll, hidePrivacy, t, setActiveTab }) {
+      const todayStr = getTodayISO();
+
+      const todayPieces = useMemo(() => orders.filter(o => o.date === todayStr).reduce((s, o) => s + (o.pieces || 0), 0), [orders, todayStr]);
+      const todayRevenue = useMemo(() => orders.filter(o => o.date === todayStr && o.deliveryStatus === 'delivered').reduce((s, o) => s + (o.amount || 0), 0), [orders, todayStr]);
+      const mtdCollected = useMemo(() => payments.filter(p => p.date.startsWith(todayStr.substring(0, 7))).reduce((s, p) => s + (p.amount || 0), 0), [payments, todayStr]);
+
+      const topDuesList = useMemo(() => {
+        return Object.values(customerBalances).filter(c => c.balance > 0).sort((a, b) => b.balance - a.balance).slice(0, 5);
+      }, [customerBalances]);
+
+      return (
+        <div className="space-y-5">
+          {/* Glossy KPIs Grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            
+            <div className="glass-card p-4 rounded-3xl border-l-4 border-emerald-500">
+              <p className="text-slate-400 text-xs font-extrabold uppercase">{t('kpiTodayPieces')}</p>
+              <h3 className="text-2xl sm:text-3xl font-black text-white mt-1">{todayPieces}</h3>
+            </div>
+
+            <div className="glass-card p-4 rounded-3xl border-l-4 border-teal-400">
+              <p className="text-slate-400 text-xs font-extrabold uppercase">{t('kpiTodayRevenue')}</p>
+              <h3 className="text-2xl sm:text-3xl font-black text-emerald-400 mt-1">{formatINR(todayRevenue, hidePrivacy)}</h3>
+            </div>
+
+            <div className="glass-card p-4 rounded-3xl border-l-4 border-rose-500">
+              <p className="text-slate-400 text-xs font-extrabold uppercase">{t('kpiTotalOutstanding')}</p>
+              <h3 className="text-2xl sm:text-3xl font-black text-rose-400 mt-1">{formatINR(totalOutstandingAll, hidePrivacy)}</h3>
+            </div>
+
+            <div className="glass-card p-4 rounded-3xl border-l-4 border-sky-400">
+              <p className="text-slate-400 text-xs font-extrabold uppercase">{t('kpiCollectedMonth')}</p>
+              <h3 className="text-2xl sm:text-3xl font-black text-sky-400 mt-1">{formatINR(mtdCollected, hidePrivacy)}</h3>
+            </div>
+
+          </div>
+
+          {/* Top Dues Card */}
+          <div className="glass-card p-5 rounded-3xl space-y-3">
+            <div className="flex justify-between items-center">
+              <h3 className="font-extrabold text-white text-base">⚠️ Shops Owing Payments</h3>
+              <button onClick={() => setActiveTab('payments')} className="text-emerald-400 text-xs font-bold underline">View All Collections →</button>
+            </div>
+
+            {topDuesList.length === 0 ? (
+              <p className="text-emerald-400 text-xs font-bold text-center py-2">🎉 All shops are fully settled!</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                {topDuesList.map(item => (
+                  <div key={item.id} onClick={() => setActiveTab('payments')} className="bg-slate-800/80 border border-slate-700/80 p-3 rounded-2xl cursor-pointer hover:border-emerald-500 transition">
+                    <p className="font-bold text-white text-sm truncate">{item.name}</p>
+                    <p className="text-xs text-slate-400">{item.phone}</p>
+                    <p className="text-rose-400 font-extrabold text-base mt-1">{formatINR(item.balance, hidePrivacy)}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    function OrderEntryView({ customers, orders, setOrders, t, showToast, refreshAllData }) {
+      const [selectedDate, setSelectedDate] = useState(getTodayISO());
+      const [selectedShift, setSelectedShift] = useState('morning');
+      const [qtyMap, setQtyMap] = useState({});
+      const [porterMap, setPorterMap] = useState({});
+
+      const isTue = isTuesday(selectedDate);
+
+      useEffect(() => {
+        if (isTue && selectedShift === 'evening') setSelectedShift('morning');
+      }, [isTue, selectedShift]);
+
+      useEffect(() => {
+        const activeCusts = customers.filter(c => c.isActive);
+        const q = {}, p = {};
+        activeCusts.forEach(c => {
+          const existing = orders.find(o => o.date === selectedDate && o.shift === selectedShift && o.customerId === c.id);
+          if (existing) {
+            q[c.id] = existing.pieces;
+            p[c.id] = existing.porterCost || 0;
+          } else {
+            q[c.id] = selectedShift === 'morning' ? (c.defaultMorningQty || 0) : (c.defaultEveningQty || 0);
+            p[c.id] = 0;
+          }
+        });
+        setQtyMap(q);
+        setPorterMap(p);
+      }, [selectedDate, selectedShift, customers, orders]);
+
+      const handleSave = () => {
+        const activeCusts = customers.filter(c => c.isActive);
+        const updated = [...orders];
+
+        activeCusts.forEach(c => {
+          const pieces = qtyMap[c.id] || 0;
+          const porterCost = porterMap[c.id] || 0;
+          const rate = c.unitRate || 7;
+          const amount = pieces * rate;
+          const idx = updated.findIndex(o => o.date === selectedDate && o.shift === selectedShift && o.customerId === c.id);
+
+          if (idx >= 0) {
+            updated[idx] = { ...updated[idx], pieces, unitRateApplied: rate, amount, porterCost };
+          } else if (pieces > 0) {
+            updated.push({
+              id: `ord-${selectedShift[0]}-${selectedDate}-${c.id}`,
+              customerId: c.id, date: selectedDate, shift: selectedShift,
+              pieces, unitRateApplied: rate, amount, deliveryStatus: 'pending', porterCost
+            });
+          }
+        });
+
+        Storage.saveOrders(updated);
+        setOrders(updated);
+        showToast("Shift orders updated!");
+        refreshAllData();
+      };
+
+      return (
+        <div className="space-y-4 max-w-4xl mx-auto">
+          <div className="glass-card p-4 rounded-3xl flex flex-wrap justify-between items-center gap-3">
+            <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="bg-slate-800 text-white font-bold border border-slate-700 rounded-xl px-3 py-2 text-xs" />
+            <div className="flex bg-slate-800 p-1 rounded-xl text-xs font-extrabold">
+              <button onClick={() => setSelectedShift('morning')} className={`px-4 py-1.5 rounded-lg ${selectedShift === 'morning' ? 'bg-emerald-500 text-slate-950' : 'text-slate-400'}`}>☀️ {t('morning')}</button>
+              <button onClick={() => setSelectedShift('evening')} disabled={isTue} className={`px-4 py-1.5 rounded-lg ${isTue ? 'opacity-30' : selectedShift === 'evening' ? 'bg-emerald-500 text-slate-950' : 'text-slate-400'}`}>🌙 {t('evening')}</button>
+            </div>
+          </div>
+
+          {isTue && <div className="p-3 bg-amber-500/20 border border-amber-500 text-amber-300 rounded-2xl text-xs font-bold">⚠️ {t('tuesdayNotice')}</div>}
+
+          <div className="glass-card rounded-3xl divide-y divide-slate-800 overflow-hidden">
+            {customers.filter(c => c.isActive).map(c => {
+              const pcs = qtyMap[c.id] || 0;
+              const rate = c.unitRate || 7;
+
+              return (
+                <div key={c.id} className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div>
+                    <h4 className="font-extrabold text-white text-base">{c.name}</h4>
+                    <p className="text-xs text-slate-400 font-medium">{c.ownerName} • <span className="text-emerald-400 font-bold">₹{rate}/pc</span></p>
+                  </div>
+
+                  <div className="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end">
+                    <div className="flex flex-col items-end">
+                      <label className="text-[10px] text-slate-400 font-bold">Rapido / Porter ₹</label>
+                      <input 
+                        type="number" placeholder="0" value={porterMap[c.id] || ''} 
+                        onChange={(e) => setPorterMap({ ...porterMap, [c.id]: parseInt(e.target.value) || 0 })}
+                        className="w-20 bg-slate-800 border border-slate-700 text-center text-xs font-bold text-amber-400 py-1.5 rounded-xl" 
+                      />
+                    </div>
+
+                    <input 
+                      type="number" value={pcs || ''} 
+                      onChange={(e) => setQtyMap({ ...qtyMap, [c.id]: parseInt(e.target.value) || 0 })}
+                      placeholder="0"
+                      className="w-20 text-center font-black text-xl text-emerald-400 bg-slate-800 border border-slate-700 py-1 rounded-xl"
+                    />
+
+                    <span className="font-black text-white text-base w-20 text-right">{formatINR(pcs * rate)}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <button onClick={handleSave} className="w-full bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-black py-3.5 rounded-2xl shadow-xl text-base">
+            💾 {t('save')} Orders
+          </button>
+        </div>
+      );
+    }
+
+    function ChecklistView({ customers, orders, setOrders, t, showToast, refreshAllData }) {
+      const [selectedDate, setSelectedDate] = useState(getTodayISO());
+      const [selectedShift, setSelectedShift] = useState('morning');
+
+      const shiftOrders = useMemo(() => orders.filter(o => o.date === selectedDate && o.shift === selectedShift && o.pieces > 0), [orders, selectedDate, selectedShift]);
+
+      const toggleStatus = (id) => {
+        const updated = orders.map(o => o.id === id ? { ...o, deliveryStatus: o.deliveryStatus === 'delivered' ? 'pending' : 'delivered' } : o);
+        Storage.saveOrders(updated);
+        setOrders(updated);
+        showToast("Status updated!");
+        refreshAllData();
+      };
+
+      return (
+        <div className="space-y-4 max-w-3xl mx-auto">
+          <div className="glass-card p-4 rounded-3xl flex justify-between items-center">
+            <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="bg-slate-800 text-white font-bold border border-slate-700 rounded-xl px-3 py-1.5 text-xs"/>
+            <div className="flex bg-slate-800 p-1 rounded-xl text-xs font-extrabold">
+              <button onClick={() => setSelectedShift('morning')} className={`px-3 py-1 rounded-lg ${selectedShift === 'morning' ? 'bg-emerald-500 text-slate-950' : 'text-slate-400'}`}>☀️ {t('morning')}</button>
+              <button onClick={() => setSelectedShift('evening')} className={`px-3 py-1 rounded-lg ${selectedShift === 'evening' ? 'bg-emerald-500 text-slate-950' : 'text-slate-400'}`}>🌙 {t('evening')}</button>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {shiftOrders.map(ord => {
+              const cust = customers.find(c => c.id === ord.customerId) || {};
+              const isDone = ord.deliveryStatus === 'delivered';
+
+              return (
+                <div key={ord.id} onClick={() => toggleStatus(ord.id)} className={`glass-card p-4 rounded-3xl cursor-pointer border-2 transition flex items-center justify-between ${isDone ? 'border-emerald-500/80 bg-emerald-950/20' : 'border-slate-800'}`}>
+                  <div>
+                    <h4 className="font-extrabold text-white text-base">{cust.name}</h4>
+                    <p className="text-xs text-slate-400">{ord.pieces} pcs • {formatINR(ord.amount)}</p>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-xs font-black ${isDone ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-400'}`}>
+                    {isDone ? '✓ Delivered' : 'Pending'}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    function CustomerCollectionsView({ customers, orders, payments, setPayments, customerBalances, totalOutstandingAll, hidePrivacy, t, showToast, refreshAllData }) {
+      const [showModal, setShowModal] = useState(false);
+      const [payCustId, setPayCustId] = useState(customers[0]?.id || '');
+      const [payAmount, setPayAmount] = useState('');
+
+      const handleSave = () => {
+        if (!payAmount || parseFloat(payAmount) <= 0) return alert("Enter valid amount");
+        const newP = { id: `pay-${Date.now()}`, customerId: payCustId, date: getTodayISO(), amount: parseFloat(payAmount), mode: 'cash', recordedAt: new Date().toISOString() };
+        const updated = [...payments, newP];
+        Storage.savePayments(updated);
+        setPayments(updated);
+        setShowModal(false);
+        showToast("Payment recorded!");
+        refreshAllData();
+      };
+
+      return (
+        <div className="space-y-4 max-w-4xl mx-auto">
+          <div className="glass-card p-5 rounded-3xl flex justify-between items-center">
+            <div>
+              <p className="text-xs text-slate-400 font-extrabold uppercase">{t('kpiTotalOutstanding')}</p>
+              <h2 className="text-3xl font-black text-rose-400 mt-0.5">{formatINR(totalOutstandingAll, hidePrivacy)}</h2>
+            </div>
+            <button onClick={() => setShowModal(true)} className="bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-black px-4 py-2.5 rounded-2xl text-xs">
+              ➕ Receive Payment
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {customers.map(cust => {
+              const bal = (customerBalances[cust.id] || {}).balance || 0;
+              return (
+                <div key={cust.id} className="glass-card p-4 rounded-3xl flex justify-between items-center">
+                  <div>
+                    <h4 className="font-extrabold text-white text-base">{cust.name}</h4>
+                    <p className="text-xs text-slate-400">📞 {cust.ownerPhone}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className={`text-xl font-black ${bal > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>{formatINR(bal, hidePrivacy)}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {showModal && (
+            <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+              <div className="glass-card p-5 rounded-3xl max-w-md w-full space-y-4">
+                <h3 className="font-black text-white text-lg">Receive Settlement Payment</h3>
+                <select value={payCustId} onChange={(e) => setPayCustId(e.target.value)} className="w-full bg-slate-800 text-white font-bold p-2.5 rounded-xl text-xs">
+                  {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+                <input type="number" placeholder="Amount ₹" value={payAmount} onChange={(e) => setPayAmount(e.target.value)} className="w-full bg-slate-800 text-emerald-400 font-black text-2xl p-2.5 rounded-xl"/>
+                <div className="flex space-x-2">
+                  <button onClick={() => setShowModal(false)} className="w-1/2 bg-slate-800 text-slate-300 font-bold py-2 rounded-xl text-xs">{t('cancel')}</button>
+                  <button onClick={handleSave} className="w-1/2 bg-emerald-500 text-slate-950 font-black py-2 rounded-xl text-xs">{t('save')}</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function ExpensesProfitView({ customers, orders, expenses, setExpenses, hidePrivacy, t, showToast, refreshAllData }) {
+      const [shopFilter, setShopFilter] = useState('all');
+      const [showModal, setShowModal] = useState(false);
+      const [expCat, setExpCat] = useState('Rice Flour / அரிசி மாவு');
+      const [expAmount, setExpAmount] = useState('');
+      const [expCustId, setExpCustId] = useState('');
+
+      const filteredOrders = useMemo(() => orders.filter(o => o.deliveryStatus === 'delivered' && (shopFilter === 'all' || o.customerId === shopFilter)), [orders, shopFilter]);
+      const filteredExpenses = useMemo(() => expenses.filter(e => shopFilter === 'all' || e.customerId === shopFilter), [expenses, shopFilter]);
+
+      const totalRev = filteredOrders.reduce((s, o) => s + (o.amount || 0), 0);
+      const totalExp = filteredExpenses.reduce((s, e) => s + (e.amount || 0), 0) + filteredOrders.reduce((s, o) => s + (o.porterCost || 0), 0);
+      const netProfit = totalRev - totalExp;
+
+      const handleSave = () => {
+        if (!expAmount || parseFloat(expAmount) <= 0) return alert("Enter amount");
+        const newE = { id: `exp-${Date.now()}`, date: getTodayISO(), category: expCat, amount: parseFloat(expAmount), mode: 'cash', customerId: expCustId };
+        const updated = [...expenses, newE];
+        Storage.saveExpenses(updated);
+        setExpenses(updated);
+        setShowModal(false);
+        showToast("Expense saved!");
+        refreshAllData();
+      };
+
+      return (
+        <div className="space-y-5 max-w-4xl mx-auto">
+          {/* Shop Profit Filter */}
+          <div className="glass-card p-4 rounded-3xl flex justify-between items-center">
+            <span className="text-xs font-extrabold text-slate-300">📊 {t('shopProfitFilter')}:</span>
+            <select value={shopFilter} onChange={(e) => setShopFilter(e.target.value)} className="bg-slate-800 text-emerald-400 font-bold border border-slate-700 text-xs px-3 py-2 rounded-xl">
+              <option value="all">{t('all')}</option>
+              {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </div>
+
+          {/* NET PROFIT BANNER */}
+          <div className="glass-card p-6 rounded-3xl border-l-4 border-emerald-500 space-y-3">
+            <p className="text-slate-400 text-xs font-black uppercase tracking-wider">{t('netProfitHeading')}</p>
+            <h1 className={`text-4xl sm:text-5xl font-black ${netProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{formatINR(netProfit, hidePrivacy)}</h1>
+            <div className="flex space-x-4 pt-2 border-t border-slate-800 text-xs font-bold">
+              <span className="text-slate-400">Revenue: <span className="text-emerald-400">{formatINR(totalRev, hidePrivacy)}</span></span>
+              <span className="text-slate-400">Expenses: <span className="text-rose-400">{formatINR(totalExp, hidePrivacy)}</span></span>
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <h3 className="font-extrabold text-white text-base">Expense Records</h3>
+            <button onClick={() => setShowModal(true)} className="bg-emerald-500 text-slate-950 font-black px-4 py-2 rounded-2xl text-xs">➕ Add Expense</button>
+          </div>
+
+          <div className="glass-card rounded-3xl divide-y divide-slate-800 p-2">
+            {filteredExpenses.map(e => (
+              <div key={e.id} className="p-3 flex justify-between items-center text-xs">
+                <div>
+                  <p className="font-extrabold text-white">{e.category}</p>
+                  <p className="text-[10px] text-slate-400">{formatDateDDMMYYYY(e.date)}</p>
+                </div>
+                <span className="font-black text-rose-400">{formatINR(e.amount, hidePrivacy)}</span>
+              </div>
+            ))}
+          </div>
+
+          {showModal && (
+            <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+              <div className="glass-card p-5 rounded-3xl max-w-md w-full space-y-4">
+                <h3 className="font-black text-white text-lg">Add Expense</h3>
+                <select value={expCat} onChange={(e) => setExpCat(e.target.value)} className="w-full bg-slate-800 text-white font-bold p-2.5 rounded-xl text-xs">
+                  <option value="Rice Flour / அரிசி மாவு">Rice Flour / அரிசி மாவு</option>
+                  <option value="Shop Rent / கடை வாடகை">Shop Rent / கடை வாடகை</option>
+                  <option value="Shop Electricity / EB">Shop Electricity / EB</option>
+                  <option value="Worker Food & Snacks / உணவு">Worker Food & Snacks</option>
+                  <option value="Others / Misc Expenses">{t('catOthers')}</option>
+                </select>
+                <input type="number" placeholder="Amount ₹" value={expAmount} onChange={(e) => setExpAmount(e.target.value)} className="w-full bg-slate-800 text-rose-400 font-black text-2xl p-2.5 rounded-xl"/>
+                <select value={expCustId} onChange={(e) => setExpCustId(e.target.value)} className="w-full bg-slate-800 text-slate-300 font-bold p-2.5 rounded-xl text-xs">
+                  <option value="">General Overhead</option>
+                  {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+                <div className="flex space-x-2">
+                  <button onClick={() => setShowModal(false)} className="w-1/2 bg-slate-800 text-slate-300 font-bold py-2 rounded-xl text-xs">{t('cancel')}</button>
+                  <button onClick={handleSave} className="w-1/2 bg-emerald-500 text-slate-950 font-black py-2 rounded-xl text-xs">{t('save')}</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function BillsView({ customers, orders, payments, settings, t }) {
+      const [selectedCustId, setSelectedCustId] = useState(customers[0]?.id || '');
+      const cust = customers.find(c => c.id === selectedCustId) || {};
+
+      const custOrders = orders.filter(o => o.customerId === selectedCustId && o.deliveryStatus === 'delivered');
+      const totalAmt = custOrders.reduce((s, o) => s + (o.amount || 0), 0);
+
+      return (
+        <div className="space-y-4 max-w-lg mx-auto">
+          <select value={selectedCustId} onChange={(e) => setSelectedCustId(e.target.value)} className="w-full bg-slate-800 text-white font-bold p-3 rounded-2xl text-xs border border-slate-700">
+            {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+
+          <div className="glass-card-light p-6 rounded-3xl text-slate-900 space-y-4 shadow-2xl">
+            <div className="text-center border-b pb-3">
+              <h2 className="text-2xl font-black text-emerald-800 uppercase">{settings.businessName || 'SRI SAI HOME FOODS'}</h2>
+              <p className="text-xs font-bold text-slate-500">Shop Bill Statement</p>
+            </div>
+            <div className="flex justify-between text-xs font-extrabold">
+              <span>Billed To: {cust.name}</span>
+              <span>Rate: ₹{cust.unitRate}/pc</span>
+            </div>
+            <div className="bg-slate-900 text-amber-400 p-4 rounded-2xl flex justify-between items-center">
+              <span className="text-xs font-extrabold">TOTAL DUE:</span>
+              <span className="text-2xl font-black">{formatINR(totalAmt)}</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function CustomersView({ customers, setCustomers, t, showToast, refreshAllData }) {
+      return (
+        <div className="space-y-3 max-w-4xl mx-auto">
+          {customers.map(c => (
+            <div key={c.id} className="glass-card p-4 rounded-3xl flex justify-between items-center">
+              <div>
+                <h4 className="font-extrabold text-white text-base">{c.name}</h4>
+                <p className="text-xs text-slate-400">{c.ownerName} • 📞 {c.ownerPhone}</p>
+              </div>
+              <span className="bg-slate-800 text-emerald-400 font-bold text-xs px-3 py-1 rounded-xl">₹{c.unitRate}/pc</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function ReportsView({ customers, orders, t }) {
+      const totalPcs = orders.filter(o => o.deliveryStatus === 'delivered').reduce((s, o) => s + (o.pieces || 0), 0);
+      return (
+        <div className="glass-card p-6 rounded-3xl text-center space-y-2 max-w-xl mx-auto">
+          <h3 className="font-extrabold text-white text-lg">Total Production Delivered</h3>
+          <p className="text-4xl font-black text-emerald-400">{totalPcs} Pieces</p>
+        </div>
+      );
+    }
+
+    function BackupView({ refreshAllData, t, showToast }) {
+      const handleDownload = () => {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(localStorage));
+        const a = document.createElement('a');
+        a.href = dataStr;
+        a.download = `srisai-backup-${getTodayISO()}.json`;
+        a.click();
+        showToast("Backup downloaded!");
+      };
+
+      return (
+        <div className="glass-card p-6 rounded-3xl text-center space-y-4 max-w-md mx-auto">
+          <h3 className="font-extrabold text-white text-lg">Backup & Restore</h3>
+          <button onClick={handleDownload} className="w-full bg-emerald-500 text-slate-950 font-black py-3 rounded-2xl text-xs">
+            📥 Download JSON Backup
+          </button>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
