@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet">
   
-  <!-- Firebase Compatibility SDKs -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
@@ -20,31 +20,25 @@
       theme: {
         extend: {
           colors: {
-            brand: { 50: '#ecfdf5', 100: '#d1fae5', 500: '#10b981', 600: '#059669', 700: '#047857' },
-            dark: { bg: '#0b0f19', card: '#111827', border: '#1f2937', hover: '#1e293b' }
-          },
-          fontFamily: {
-            sans: ['Inter', 'Noto Sans Tamil', 'sans-serif'],
-            tamil: ['Noto Sans Tamil', 'sans-serif']
+            brand: { 50: '#ecfdf5', 100: '#d1fae5', 500: '#10b981', 600: '#059669', 700: '#047857' }
           }
         }
       }
-    }
+    };
   </script>
   <style>
     body { background-color: #0b0f19; color: #f3f4f6; font-family: 'Inter', 'Noto Sans Tamil', sans-serif; }
-    .glass { background: rgba(17, 24, 39, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-    .glass-card { background: rgba(30, 41, 59, 0.45); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.05); }
-    .glow-emerald { box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.3); }
+    .glass { background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .glass-card { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.05); }
     .hide-numbers .secret-number { filter: blur(6px); user-select: none; }
   </style>
 </head>
-<body class="min-h-screen pb-24 md:pb-8">
+<body class="min-h-screen pb-20">
   <div id="app" class="max-w-7xl mx-auto px-4 py-4"></div>
 
   <script>
-    // Firebase credentials
-    const firebaseConfig = {
+    // 1. Firebase Credentials
+    var firebaseConfig = {
       apiKey: "AIzaSyBE04f1-vwEbhkCxX-o_xU62aXTTok-AB4",
       authDomain: "sri-sai-home-foods-30fdb.firebaseapp.com",
       projectId: "sri-sai-home-foods-30fdb",
@@ -53,670 +47,362 @@
       appId: "1:626791846753:web:524fa5121115ef122f2b20"
     };
 
-    let dbCloud = null;
+    var dbCloud = null;
     try {
-      firebase.initializeApp(firebaseConfig);
-      dbCloud = firebase.firestore();
+      if (typeof firebase !== 'undefined') {
+        firebase.initializeApp(firebaseConfig);
+        dbCloud = firebase.firestore();
+      }
     } catch(e) {
-      console.warn("Firebase initialized in local fallback mode.");
+      console.log("Firebase fallback mode.");
     }
 
-    const STORAGE_KEY = 'srisai_data_v5';
+    var STORAGE_KEY = 'srisai_production_v1';
 
-    const initialData = {
+    var initialData = {
       settings: {
         businessName: "Sri Sai Home Foods",
-        ownerName: "Father",
-        businessPhone: "9842100000",
+        ownerPhone: "9842100000",
         upiId: "srisaihomefoods@upi",
-        defaultRate: 7,
-        language: "en",
-        hideConfidential: true
+        hideConfidential: true,
+        language: "en"
       },
       customers: [
-        { id: 'c1', name: 'Hotel Annapoorna', type: 'hotel', ownerPhone: '9842100001', unitRate: 7, defaultMorningQty: 100, defaultEveningQty: 80, isActive: true, notes: 'Morning supply by 6 AM' },
-        { id: 'c2', name: 'Hotel Saravana Bhavan', type: 'hotel', ownerPhone: '9842100002', unitRate: 6, defaultMorningQty: 150, defaultEveningQty: 120, isActive: true, notes: 'Special rate shop' },
-        { id: 'c3', name: 'Sangeetha Restaurant', type: 'restaurant', ownerPhone: '9842100003', unitRate: 6, defaultMorningQty: 80, defaultEveningQty: 60, isActive: true, notes: 'Special rate shop' },
-        { id: 'c4', name: 'Sri Ram Caterers', type: 'catering', ownerPhone: '9842100004', unitRate: 7, defaultMorningQty: 200, defaultEveningQty: 0, isActive: true, notes: 'Morning orders only' }
+        { id: 'c1', name: 'Hotel Annapoorna', type: 'hotel', ownerPhone: '9842100001', unitRate: 7, defaultMorningQty: 100, defaultEveningQty: 80, isActive: true },
+        { id: 'c2', name: 'Hotel Saravana Bhavan', type: 'hotel', ownerPhone: '9842100002', unitRate: 6, defaultMorningQty: 150, defaultEveningQty: 120, isActive: true },
+        { id: 'c3', name: 'Sangeetha Restaurant', type: 'restaurant', ownerPhone: '9842100003', unitRate: 6, defaultMorningQty: 80, defaultEveningQty: 60, isActive: true },
+        { id: 'c4', name: 'Sri Ram Caterers', type: 'catering', ownerPhone: '9842100004', unitRate: 7, defaultMorningQty: 200, defaultEveningQty: 0, isActive: true }
       ],
       orders: [
         { id: 'o1', customerId: 'c1', date: '2026-10-12', shift: 'morning', pieces: 100, unitRateApplied: 7, amount: 700, deliveryStatus: 'delivered', rapidoCharge: 40 },
         { id: 'o2', customerId: 'c2', date: '2026-10-12', shift: 'morning', pieces: 150, unitRateApplied: 6, amount: 900, deliveryStatus: 'delivered', rapidoCharge: 50 },
         { id: 'o3', customerId: 'c1', date: '2026-10-13', shift: 'morning', pieces: 100, unitRateApplied: 7, amount: 700, deliveryStatus: 'delivered', rapidoCharge: 40 },
         { id: 'o4', customerId: 'c2', date: '2026-10-13', shift: 'morning', pieces: 150, unitRateApplied: 6, amount: 900, deliveryStatus: 'delivered', rapidoCharge: 50 },
-        { id: 'o5', customerId: 'c3', date: '2026-10-13', shift: 'morning', pieces: 80, unitRateApplied: 6, amount: 480, deliveryStatus: 'delivered', rapidoCharge: 30 },
-        { id: 'o6', customerId: 'c1', date: '2026-10-14', shift: 'morning', pieces: 100, unitRateApplied: 7, amount: 700, deliveryStatus: 'delivered', rapidoCharge: 40 },
-        { id: 'o7', customerId: 'c2', date: '2026-10-14', shift: 'morning', pieces: 150, unitRateApplied: 6, amount: 900, deliveryStatus: 'delivered', rapidoCharge: 50 }
+        { id: 'o5', customerId: 'c3', date: '2026-10-13', shift: 'morning', pieces: 80, unitRateApplied: 6, amount: 480, deliveryStatus: 'delivered', rapidoCharge: 30 }
       ],
       payments: [
-        { id: 'p1', customerId: 'c1', date: '2026-10-12', amount: 700, mode: 'UPI', reference: 'UPI98234123' },
-        { id: 'p2', customerId: 'c2', date: '2026-10-10', amount: 1000, mode: 'Cash', reference: '' }
+        { id: 'p1', customerId: 'c1', date: '2026-10-12', amount: 700, mode: 'UPI' },
+        { id: 'p2', customerId: 'c2', date: '2026-10-10', amount: 1000, mode: 'Cash' }
       ],
       expenses: [
-        { id: 'e1', category: 'Rice Flour', amount: 1200, date: '2026-10-10', customerId: '', note: '50kg Bag' },
-        { id: 'e2', category: 'Rapido / Porter', amount: 210, date: '2026-10-12', customerId: 'c2', note: 'Delivery fees' },
-        { id: 'e3', category: 'Shop Rent', amount: 5000, date: '2026-10-01', customerId: '', note: 'Monthly Rent' }
+        { id: 'e1', category: 'Rice Flour', amount: 1200, date: '2026-10-10', note: '50kg Bag' },
+        { id: 'e2', category: 'Rapido / Porter', amount: 210, date: '2026-10-12', note: 'Delivery charges' }
       ]
     };
 
-    function loadData() {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : initialData;
-    }
-
-    function saveData(data) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      if (dbCloud) {
-        dbCloud.collection('app_data').doc('main_store').set(data)
-          .catch(err => console.error("Firebase sync error:", err));
+    function loadDB() {
+      try {
+        var str = localStorage.getItem(STORAGE_KEY);
+        return str ? JSON.parse(str) : initialData;
+      } catch(e) {
+        return initialData;
       }
     }
 
-    let state = {
-      db: loadData(),
-      currentTab: 'dashboard',
-      dashFilter: { mode: 'all', shopId: 'all', startDate: '2026-10-01', endDate: '2026-10-14' },
-      billFilter: { shopId: 'c1', rangeMode: 'thisMonth', startDate: '2026-10-01', endDate: '2026-10-14' },
-      reportFilter: { shopId: 'all', rangeMode: 'thisMonth', startDate: '2026-10-01', endDate: '2026-10-14' },
-      showAddShopModal: false,
-      restorePreviewData: null
+    function saveDB(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      if (dbCloud) {
+        dbCloud.collection('app_data').doc('main_store').set(data).catch(function(err){});
+      }
+    }
+
+    var appState = {
+      db: loadDB(),
+      tab: 'dashboard',
+      dashShop: 'all',
+      billShop: 'c1',
+      showModal: false,
+      restorePreview: null
     };
 
     if (dbCloud) {
-      dbCloud.collection('app_data').doc('main_store').onSnapshot(doc => {
+      dbCloud.collection('app_data').doc('main_store').onSnapshot(function(doc) {
         if (doc.exists) {
-          state.db = doc.data();
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state.db));
-          renderApp();
+          appState.db = doc.data();
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(appState.db));
+          render();
         }
       });
     }
 
-    function formatRupee(amount) {
-      if (state.db.settings.hideConfidential) return '••••••';
-      return '₹' + Number(amount || 0).toLocaleString('en-IN');
+    function formatMoney(num) {
+      if (appState.db.settings.hideConfidential) return '••••••';
+      return '₹' + Number(num || 0).toLocaleString('en-IN');
     }
 
-    function renderApp() {
-      const app = document.getElementById('app');
-      app.className = state.db.settings.hideConfidential ? 'hide-numbers' : '';
+    function render() {
+      var container = document.getElementById('app');
+      container.className = appState.db.settings.hideConfidential ? 'hide-numbers' : '';
 
-      app.innerHTML = `
-        <!-- Header -->
-        <header class="glass rounded-2xl p-4 mb-6 flex flex-wrap justify-between items-center gap-4">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xl border border-emerald-500/30">SS</div>
-            <div>
-              <h1 class="text-xl font-bold text-white tracking-wide">${state.db.settings.businessName}</h1>
-              <p class="text-xs text-gray-400">Idiyappam Supply & Revenue Hub</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-3">
-            <button onclick="toggleHideNumbers()" class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 border border-gray-700 flex items-center gap-2">
-              <span>${state.db.settings.hideConfidential ? '🙈 Numbers Hidden' : '👁️ Numbers Visible'}</span>
-            </button>
-            <button onclick="toggleLanguage()" class="px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold text-xs border border-emerald-500/30">
-              ${state.db.settings.language === 'en' ? 'EN' : 'தமிழ்'}
-            </button>
-          </div>
-        </header>
+      var html = '';
 
-        <!-- Dynamic Navigation -->
-        <nav class="flex overflow-x-auto gap-2 pb-2 mb-6 scrollbar-none">
-          ${['dashboard', 'orders', 'checklist', 'collections', 'expenses', 'bills', 'shops', 'reports', 'backup'].map(tab => `
-            <button onclick="setTab('${tab}')" class="px-4 py-2.5 rounded-xl font-medium text-sm whitespace-nowrap transition-all ${
-              state.currentTab === tab 
-                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 font-semibold' 
-                : 'bg-gray-800/60 text-gray-400 hover:bg-gray-800 hover:text-white'
-            }">
-              ${tab.toUpperCase()}
-            </button>
-          `).join('')}
-        </nav>
+      // Header
+      html += '<header class="glass rounded-2xl p-4 mb-6 flex justify-between items-center flex-wrap gap-4">';
+      html += '  <div class="flex items-center gap-3">';
+      html += '    <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xl border border-emerald-500/30">SS</div>';
+      html += '    <div><h1 class="text-xl font-bold text-white">' + appState.db.settings.businessName + '</h1><p class="text-xs text-gray-400">Idiyappam Supply & Revenue Hub</p></div>';
+      html += '  </div>';
+      html += '  <div class="flex gap-2">';
+      html += '    <button onclick="togglePrivacy()" class="px-3 py-1.5 rounded-lg bg-gray-800 text-xs text-gray-300 border border-gray-700">' + (appState.db.settings.hideConfidential ? '🙈 Numbers Hidden' : '👁️ Numbers Visible') + '</button>';
+      html += '  </div>';
+      html += '</header>';
 
-        <!-- Main View Routing -->
-        <main>
-          ${state.currentTab === 'dashboard' ? renderDashboard() : ''}
-          ${state.currentTab === 'orders' ? renderOrders() : ''}
-          ${state.currentTab === 'checklist' ? renderChecklist() : ''}
-          ${state.currentTab === 'collections' ? renderCollections() : ''}
-          ${state.currentTab === 'expenses' ? renderExpenses() : ''}
-          ${state.currentTab === 'bills' ? renderBills() : ''}
-          ${state.currentTab === 'shops' ? renderShops() : ''}
-          ${state.currentTab === 'reports' ? renderReports() : ''}
-          ${state.currentTab === 'backup' ? renderBackup() : ''}
-        </main>
-      `;
+      // Nav Tabs
+      var tabs = ['dashboard', 'orders', 'checklist', 'collections', 'expenses', 'bills', 'shops', 'backup'];
+      html += '<nav class="flex overflow-x-auto gap-2 pb-2 mb-6 scrollbar-none">';
+      for (var i = 0; i < tabs.length; i++) {
+        var t = tabs[i];
+        var active = appState.tab === t;
+        html += '<button onclick="switchTab(\'' + t + '\')" class="px-4 py-2.5 rounded-xl font-semibold text-xs whitespace-nowrap transition-all ' + (active ? 'bg-emerald-500 text-white shadow-lg' : 'bg-gray-800/60 text-gray-400') + '">' + t.toUpperCase() + '</button>';
+      }
+      html += '</nav>';
+
+      // Page Contents
+      html += '<main>';
+      if (appState.tab === 'dashboard') html += renderDashboard();
+      if (appState.tab === 'orders') html += renderOrders();
+      if (appState.tab === 'checklist') html += renderChecklist();
+      if (appState.tab === 'collections') html += renderCollections();
+      if (appState.tab === 'expenses') html += renderExpenses();
+      if (appState.tab === 'bills') html += renderBills();
+      if (appState.tab === 'shops') html += renderShops();
+      if (appState.tab === 'backup') html += renderBackup();
+      html += '</main>';
+
+      container.innerHTML = html;
     }
 
-    // DASHBOARD VIEW
     function renderDashboard() {
-      let filteredOrders = state.db.orders.filter(o => o.deliveryStatus === 'delivered');
-      if (state.dashFilter.shopId !== 'all') {
-        filteredOrders = filteredOrders.filter(o => o.customerId === state.dashFilter.shopId);
-      }
-      if (state.dashFilter.mode === 'custom' && state.dashFilter.startDate && state.dashFilter.endDate) {
-        filteredOrders = filteredOrders.filter(o => o.date >= state.dashFilter.startDate && o.date <= state.dashFilter.endDate);
+      var orders = appState.db.orders.filter(function(o){ return o.deliveryStatus === 'delivered'; });
+      if (appState.dashShop !== 'all') {
+        orders = orders.filter(function(o){ return o.customerId === appState.dashShop; });
       }
 
-      const totalRevenue = filteredOrders.reduce((sum, o) => sum + o.amount, 0);
-      const totalPieces = filteredOrders.reduce((sum, o) => sum + o.pieces, 0);
-      const totalPaid = state.db.payments.reduce((sum, p) => sum + p.amount, 0);
-      const totalDeliveredAll = state.db.orders.filter(o => o.deliveryStatus === 'delivered').reduce((s, o) => s + o.amount, 0);
-      const totalDues = totalDeliveredAll - totalPaid;
+      var rev = orders.reduce(function(s, o){ return s + o.amount; }, 0);
+      var pcs = orders.reduce(function(s, o){ return s + o.pieces; }, 0);
+      var paid = appState.db.payments.reduce(function(s, p){ return s + p.amount; }, 0);
+      var totalDelivered = appState.db.orders.filter(function(o){ return o.deliveryStatus === 'delivered'; }).reduce(function(s, o){ return s + o.amount; }, 0);
+      var dues = totalDelivered - paid;
 
-      const dateMap = {};
-      filteredOrders.forEach(o => {
-        dateMap[o.date] = (dateMap[o.date] || 0) + o.amount;
-      });
-      const dates = Object.keys(dateMap).sort();
-      const maxVal = Math.max(...Object.values(dateMap), 1000);
+      var h = '';
+      h += '<div class="glass p-4 rounded-2xl mb-6 flex items-center justify-between">';
+      h += '  <span class="text-xs text-gray-400 font-bold">Filter Shop:</span>';
+      h += '  <select onchange="setDashShop(this.value)" class="bg-gray-900 border border-gray-700 text-white text-xs rounded-xl px-3 py-2">';
+      h += '    <option value="all">All Shops</option>';
+      for (var i = 0; i < appState.db.customers.length; i++) {
+        var c = appState.db.customers[i];
+        h += '    <option value="' + c.id + '" ' + (appState.dashShop === c.id ? 'selected' : '') + '>' + c.name + '</option>';
+      }
+      h += '  </select>';
+      h += '</div>';
 
-      return `
-        <div class="glass p-4 rounded-2xl mb-6">
-          <div class="flex flex-wrap gap-4 items-center justify-between">
-            <div class="flex flex-wrap items-center gap-3">
-              <label class="text-xs text-gray-400 font-semibold">Filter Shop:</label>
-              <select onchange="updateDashFilter('shopId', this.value)" class="bg-gray-900 border border-gray-700 text-white text-xs rounded-xl px-3 py-2">
-                <option value="all">All Shops</option>
-                ${state.db.customers.map(c => `<option value="${c.id}" ${state.dashFilter.shopId === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}
-              </select>
+      h += '<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">';
+      h += '  <div class="glass-card p-4 rounded-2xl border-l-4 border-emerald-500"><p class="text-xs text-gray-400">PIECES SUPPLIED</p><p class="text-2xl font-bold text-white mt-1 secret-number">' + pcs + '</p></div>';
+      h += '  <div class="glass-card p-4 rounded-2xl border-l-4 border-teal-500"><p class="text-xs text-gray-400">TOTAL REVENUE</p><p class="text-2xl font-bold text-emerald-400 mt-1 secret-number">' + formatMoney(rev) + '</p></div>';
+      h += '  <div class="glass-card p-4 rounded-2xl border-l-4 border-rose-500"><p class="text-xs text-gray-400">TOTAL DUES OWED</p><p class="text-2xl font-bold text-rose-400 mt-1 secret-number">' + formatMoney(dues) + '</p></div>';
+      h += '  <div class="glass-card p-4 rounded-2xl border-l-4 border-sky-500"><p class="text-xs text-gray-400">COLLECTED CASH</p><p class="text-2xl font-bold text-sky-400 mt-1 secret-number">' + formatMoney(paid) + '</p></div>';
+      h += '</div>';
 
-              <label class="text-xs text-gray-400 font-semibold">Range:</label>
-              <select onchange="updateDashFilter('mode', this.value)" class="bg-gray-900 border border-gray-700 text-white text-xs rounded-xl px-3 py-2">
-                <option value="all" ${state.dashFilter.mode === 'all' ? 'selected' : ''}>All Time</option>
-                <option value="custom" ${state.dashFilter.mode === 'custom' ? 'selected' : ''}>Custom Date Range</option>
-              </select>
-            </div>
-
-            ${state.dashFilter.mode === 'custom' ? `
-              <div class="flex items-center gap-2">
-                <input type="date" value="${state.dashFilter.startDate}" onchange="updateDashFilter('startDate', this.value)" class="bg-gray-900 border border-gray-700 text-white text-xs rounded-xl px-2.5 py-1.5">
-                <span class="text-gray-400 text-xs">to</span>
-                <input type="date" value="${state.dashFilter.endDate}" onchange="updateDashFilter('endDate', this.value)" class="bg-gray-900 border border-gray-700 text-white text-xs rounded-xl px-2.5 py-1.5">
-              </div>
-            ` : ''}
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div class="glass-card p-4 rounded-2xl border-l-4 border-emerald-500">
-            <p class="text-xs text-gray-400 font-medium">FILTERED PIECES</p>
-            <p class="text-2xl font-bold text-white mt-1 secret-number">${totalPieces}</p>
-          </div>
-          <div class="glass-card p-4 rounded-2xl border-l-4 border-teal-500">
-            <p class="text-xs text-gray-400 font-medium">FILTERED REVENUE</p>
-            <p class="text-2xl font-bold text-emerald-400 mt-1 secret-number">${formatRupee(totalRevenue)}</p>
-          </div>
-          <div class="glass-card p-4 rounded-2xl border-l-4 border-rose-500">
-            <p class="text-xs text-gray-400 font-medium">TOTAL DUES OWED</p>
-            <p class="text-2xl font-bold text-rose-400 mt-1 secret-number">${formatRupee(totalDues)}</p>
-          </div>
-          <div class="glass-card p-4 rounded-2xl border-l-4 border-sky-500">
-            <p class="text-xs text-gray-400 font-medium">TOTAL COLLECTED</p>
-            <p class="text-2xl font-bold text-sky-400 mt-1 secret-number">${formatRupee(totalPaid)}</p>
-          </div>
-        </div>
-
-        <div class="glass p-5 rounded-2xl mb-6">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-md font-bold text-white">Business Revenue Analytics</h2>
-            <span class="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">Live Graph</span>
-          </div>
-          <div class="h-48 w-full flex items-end gap-2 pt-6 pb-2 border-b border-gray-800 overflow-x-auto">
-            ${dates.length === 0 ? '<p class="text-xs text-gray-500 mx-auto self-center">No orders found for this filter range.</p>' : ''}
-            ${dates.map(d => {
-              const val = dateMap[d];
-              const pct = Math.max((val / maxVal) * 100, 8);
-              return `
-                <div class="flex-1 min-w-[36px] flex flex-col items-center gap-2 group">
-                  <span class="text-[10px] text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity secret-number">₹${val}</span>
-                  <div class="w-full bg-emerald-500/80 hover:bg-emerald-400 rounded-t-lg transition-all" style="height: ${pct}%"></div>
-                  <span class="text-[9px] text-gray-400 rotate-45 transform origin-left">${d.slice(5)}</span>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-      `;
+      return h;
     }
 
-    // ORDER ENTRY
     function renderOrders() {
-      return `
-        <div class="glass p-5 rounded-2xl">
-          <h2 class="text-lg font-bold text-white mb-2">Quick Shift Order Entry</h2>
-          <p class="text-xs text-gray-400 mb-6">Enter supply counts and delivery fees for today's shift.</p>
-          <div class="space-y-4">
-            ${state.db.customers.filter(c => c.isActive).map(c => `
-              <div class="glass-card p-4 rounded-xl flex flex-wrap md:flex-nowrap justify-between items-center gap-4">
-                <div>
-                  <p class="font-bold text-white">${c.name}</p>
-                  <p class="text-xs text-emerald-400">Rate: ₹${c.unitRate}/pc</p>
-                </div>
-                <div class="flex items-center gap-3 w-full md:w-auto">
-                  <div>
-                    <label class="text-[10px] text-gray-400 block mb-1">PIECES</label>
-                    <input type="number" value="${c.defaultMorningQty}" class="w-24 bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-white font-bold text-center">
-                  </div>
-                  <div>
-                    <label class="text-[10px] text-gray-400 block mb-1">RAPIDO/PORTER (₹)</label>
-                    <input type="number" placeholder="0" class="w-24 bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-white font-bold text-center">
-                  </div>
-                </div>
-              </div>
-            `).join('')}
-            <button onclick="alert('Shift Orders Saved Successfully!')" class="w-full bg-emerald-500 hover:bg-emerald-600 font-bold text-white py-3 rounded-xl shadow-lg shadow-emerald-500/20">
-              SAVE SHIFT ORDERS
-            </button>
-          </div>
-        </div>
-      `;
+      var h = '<div class="glass p-5 rounded-2xl"><h2 class="text-lg font-bold text-white mb-4">Quick Shift Order Entry</h2><div class="space-y-4">';
+      for (var i = 0; i < appState.db.customers.length; i++) {
+        var c = appState.db.customers[i];
+        if (!c.isActive) continue;
+        h += '<div class="glass-card p-4 rounded-xl flex justify-between items-center">';
+        h += '  <div><p class="font-bold text-white">' + c.name + '</p><p class="text-xs text-emerald-400">Rate: ₹' + c.unitRate + '/pc</p></div>';
+        h += '  <div class="flex items-center gap-3">';
+        h += '    <input type="number" value="' + c.defaultMorningQty + '" class="w-20 bg-gray-900 border border-gray-700 text-white text-center font-bold px-2 py-1.5 rounded-lg">';
+        h += '  </div>';
+        h += '</div>';
+      }
+      h += '<button onclick="alert(\'Shift Orders Saved!\')" class="w-full bg-emerald-500 font-bold text-white py-3 rounded-xl shadow-lg mt-4">SAVE SHIFT ORDERS</button>';
+      h += '</div></div>';
+      return h;
     }
 
-    // CHECKLIST
     function renderChecklist() {
-      return `
-        <div class="glass p-5 rounded-2xl">
-          <h2 class="text-lg font-bold text-white mb-4">Today's Delivery Checklist</h2>
-          <div class="space-y-3">
-            ${state.db.customers.filter(c => c.isActive).map(c => `
-              <div class="glass-card p-4 rounded-xl flex justify-between items-center">
-                <div>
-                  <p class="font-bold text-white">${c.name}</p>
-                  <p class="text-xs text-gray-400">${c.defaultMorningQty} Pieces • Morning Shift</p>
-                </div>
-                <button onclick="this.innerText = '✓ DELIVERED'; this.className = 'px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'" class="px-4 py-2 rounded-xl text-xs font-bold bg-gray-800 text-gray-300 border border-gray-700">
-                  MARK DELIVERED
-                </button>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `;
+      var h = '<div class="glass p-5 rounded-2xl"><h2 class="text-lg font-bold text-white mb-4">Today\'s Delivery Checklist</h2><div class="space-y-3">';
+      for (var i = 0; i < appState.db.customers.length; i++) {
+        var c = appState.db.customers[i];
+        if (!c.isActive) continue;
+        h += '<div class="glass-card p-4 rounded-xl flex justify-between items-center">';
+        h += '  <div><p class="font-bold text-white">' + c.name + '</p><p class="text-xs text-gray-400">' + c.defaultMorningQty + ' Pieces • Morning Shift</p></div>';
+        h += '  <button onclick="this.innerText=\'✓ DELIVERED\'; this.className=\'px-3 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-bold\'" class="px-3 py-1.5 bg-gray-800 text-gray-300 rounded-lg text-xs font-bold">MARK DELIVERED</button>';
+        h += '</div>';
+      }
+      h += '</div></div>';
+      return h;
     }
 
-    // COLLECTIONS
     function renderCollections() {
-      return `
-        <div class="glass p-5 rounded-2xl">
-          <h2 class="text-lg font-bold text-white mb-4">Customer Collections & Settlements</h2>
-          <div class="space-y-3">
-            ${state.db.customers.map(c => {
-              const custDelivered = state.db.orders.filter(o => o.customerId === c.id && o.deliveryStatus === 'delivered').reduce((s, o) => s + o.amount, 0);
-              const custPaid = state.db.payments.filter(p => p.customerId === c.id).reduce((s, p) => s + p.amount, 0);
-              const bal = custDelivered - custPaid;
-              return `
-                <div class="glass-card p-4 rounded-xl flex justify-between items-center">
-                  <div>
-                    <p class="font-bold text-white">${c.name}</p>
-                    <p class="text-xs text-gray-400">Total Billed: ₹${custDelivered} \vert{} Total Paid: ₹${custPaid}</p>
-                  </div>
-                  <div class="text-right">
-                    <span class="block text-sm font-bold secret-number ${bal > 0 ? 'text-rose-400' : 'text-emerald-400'}">
-                      ${bal > 0 ? `Owes ${formatRupee(bal)}` : 'Settled'}
-                    </span>
-                    <button onclick="alert('Record payment modal')" class="mt-1 px-3 py-1 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg font-medium">
-                      + Record Payment
-                    </button>
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-      `;
+      var h = '<div class="glass p-5 rounded-2xl"><h2 class="text-lg font-bold text-white mb-4">Customer Collections</h2><div class="space-y-3">';
+      for (var i = 0; i < appState.db.customers.length; i++) {
+        var c = appState.db.customers[i];
+        var billed = appState.db.orders.filter(function(o){ return o.customerId === c.id && o.deliveryStatus === 'delivered'; }).reduce(function(s, o){ return s + o.amount; }, 0);
+        var paid = appState.db.payments.filter(function(p){ return p.customerId === c.id; }).reduce(function(s, p){ return s + p.amount; }, 0);
+        var bal = billed - paid;
+        h += '<div class="glass-card p-4 rounded-xl flex justify-between items-center">';
+        h += '  <div><p class="font-bold text-white">' + c.name + '</p><p class="text-xs text-gray-400">Billed: ₹' + billed + ' | Paid: ₹' + paid + '</p></div>';
+        h += '  <div class="text-right"><span class="block text-sm font-bold secret-number ' + (bal > 0 ? 'text-rose-400' : 'text-emerald-400') + '">' + (bal > 0 ? 'Owes ' + formatMoney(bal) : 'Settled') + '</span></div>';
+        h += '</div>';
+      }
+      h += '</div></div>';
+      return h;
     }
 
-    // EXPENSES
     function renderExpenses() {
-      return `
-        <div class="glass p-5 rounded-2xl">
-          <h2 class="text-lg font-bold text-white mb-4">Expenses & Net Profit Tracker</h2>
-          <div class="space-y-3">
-            ${state.db.expenses.map(e => `
-              <div class="glass-card p-3 rounded-xl flex justify-between items-center">
-                <div>
-                  <p class="font-bold text-white text-sm">${e.category}</p>
-                  <p class="text-xs text-gray-400">${e.date} •${e.note || 'General Expense'}</p>
-                </div>
-                <span class="font-bold text-rose-400 text-sm secret-number">₹${e.amount}</span>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `;
+      var h = '<div class="glass p-5 rounded-2xl"><h2 class="text-lg font-bold text-white mb-4">Expenses Tracker</h2><div class="space-y-3">';
+      for (var i = 0; i < appState.db.expenses.length; i++) {
+        var e = appState.db.expenses[i];
+        h += '<div class="glass-card p-3 rounded-xl flex justify-between items-center">';
+        h += '  <div><p class="font-bold text-white text-sm">' + e.category + '</p><p class="text-xs text-gray-400">' + e.date + ' • ' + (e.note || '') + '</p></div>';
+        h += '  <span class="font-bold text-rose-400 text-sm secret-number">₹' + e.amount + '</span>';
+        h += '</div>';
+      }
+      h += '</div></div>';
+      return h;
     }
 
-    // BILLS
     function renderBills() {
-      const selectedCustomer = state.db.customers.find(c => c.id === state.billFilter.shopId) || state.db.customers[0];
-      let filteredOrders = state.db.orders.filter(o => o.customerId === selectedCustomer.id && o.deliveryStatus === 'delivered');
-
-      if (state.billFilter.rangeMode === 'custom' && state.billFilter.startDate && state.billFilter.endDate) {
-        filteredOrders = filteredOrders.filter(o => o.date >= state.billFilter.startDate && o.date <= state.billFilter.endDate);
+      var selected = appState.db.customers[0];
+      for (var i = 0; i < appState.db.customers.length; i++) {
+        if (appState.db.customers[i].id === appState.billShop) selected = appState.db.customers[i];
       }
 
-      const billTotal = filteredOrders.reduce((sum, o) => sum + o.amount, 0);
-      const billPieces = filteredOrders.reduce((sum, o) => sum + o.pieces, 0);
+      var orders = appState.db.orders.filter(function(o){ return o.customerId === selected.id && o.deliveryStatus === 'delivered'; });
+      var totalAmt = orders.reduce(function(s, o){ return s + o.amount; }, 0);
+      var totalPcs = orders.reduce(function(s, o){ return s + o.pieces; }, 0);
 
-      return `
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="glass p-5 rounded-2xl space-y-4">
-            <h2 class="text-lg font-bold text-white">Bill Settings</h2>
-            <div>
-              <label class="text-xs text-gray-400 block mb-1">Select Customer/Shop</label>
-              <select onchange="updateBillFilter('shopId', this.value)" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">
-                ${state.db.customers.map(c => `<option value="${c.id}" ${state.billFilter.shopId === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}
-              </select>
-            </div>
+      var h = '<div class="grid grid-cols-1 md:grid-cols-3 gap-6">';
+      h += '<div class="glass p-5 rounded-2xl space-y-4">';
+      h += '  <h2 class="text-lg font-bold text-white">Select Shop</h2>';
+      h += '  <select onchange="setBillShop(this.value)" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">';
+      for (var j = 0; j < appState.db.customers.length; j++) {
+        var c = appState.db.customers[j];
+        h += '    <option value="' + c.id + '" ' + (selected.id === c.id ? 'selected' : '') + '>' + c.name + '</option>';
+      }
+      h += '  </select>';
+      h += '  <button onclick="shareWhatsApp(\'' + selected.name + '\', \'' + selected.ownerPhone + '\', ' + totalPcs + ', ' + totalAmt + ')" class="w-full bg-emerald-500 font-bold text-white py-3 rounded-xl shadow-lg mt-4">📲 Share on WhatsApp</button>';
+      h += '</div>';
 
-            <div>
-              <label class="text-xs text-gray-400 block mb-1">Date Range Filter</label>
-              <select onchange="updateBillFilter('rangeMode', this.value)" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">
-                <option value="thisMonth" ${state.billFilter.rangeMode === 'thisMonth' ? 'selected' : ''}>This Month</option>
-                <option value="custom" ${state.billFilter.rangeMode === 'custom' ? 'selected' : ''}>Custom Date Range</option>
-              </select>
-            </div>
+      h += '<div class="md:col-span-2">';
+      h += '  <div id="billCard" class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl">';
+      h += '    <div class="border-b border-slate-800 pb-4 mb-4 flex justify-between items-start">';
+      h += '      <div><h1 class="text-xl font-extrabold text-emerald-400">IDIYAPPAM BILL</h1><p class="text-xs text-slate-400 font-bold">' + appState.db.settings.businessName + '</p></div>';
+      h += '      <div class="text-right"><span class="text-xs font-bold text-slate-300 block">' + selected.name + '</span><span class="text-xs text-slate-500">' + selected.ownerPhone + '</span></div>';
+      h += '    </div>';
+      h += '    <table class="w-full text-left text-xs mb-6">';
+      h += '      <thead><tr class="border-b border-slate-800 text-slate-400"><th class="py-2">Date</th><th class="py-2">Shift</th><th class="py-2 text-center">Pieces</th><th class="py-2 text-right">Amount</th></tr></thead>';
+      h += '      <tbody class="divide-y divide-slate-800/60 text-slate-200">';
+      for (var k = 0; k < orders.length; k++) {
+        var o = orders[k];
+        h += '        <tr><td class="py-2">' + o.date + '</td><td class="py-2 capitalize">' + o.shift + '</td><td class="py-2 text-center">' + o.pieces + '</td><td class="py-2 text-right font-bold text-emerald-400">₹' + o.amount + '</td></tr>';
+      }
+      h += '      </tbody>';
+      h += '    </table>';
+      h += '    <div class="border-t-2 border-slate-800 pt-4 flex justify-between items-center">';
+      h += '      <div><p class="text-xs text-slate-400">Total Pieces</p><p class="text-lg font-bold text-white">' + totalPcs + ' Pcs</p></div>';
+      h += '      <div class="text-right"><p class="text-xs text-slate-400">TOTAL DUE</p><p class="text-2xl font-extrabold text-emerald-400 secret-number">' + formatMoney(totalAmt) + '</p></div>';
+      h += '    </div>';
+      h += '  </div>';
+      h += '</div>';
+      h += '</div>';
 
-            ${state.billFilter.rangeMode === 'custom' ? `
-              <div class="space-y-2">
-                <input type="date" value="${state.billFilter.startDate}" onchange="updateBillFilter('startDate', this.value)" class="w-full bg-gray-900 border border-gray-700 text-white text-xs rounded-xl px-3 py-2">
-                <input type="date" value="${state.billFilter.endDate}" onchange="updateBillFilter('endDate', this.value)" class="w-full bg-gray-900 border border-gray-700 text-white text-xs rounded-xl px-3 py-2">
-              </div>
-            ` : ''}
-
-            <div class="pt-4 space-y-2">
-              <button onclick="sendWhatsAppBill('${selectedCustomer.id}', '${selectedCustomer.ownerPhone}', ${billPieces}, ${billTotal})" class="w-full bg-emerald-500 hover:bg-emerald-600 font-bold text-white py-3 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
-                <span>📲 Share on WhatsApp</span>
-              </button>
-              <button onclick="downloadBillPNG()" class="w-full bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold py-2.5 rounded-xl border border-gray-700 text-xs">
-                📷 Download as Image (PNG)
-              </button>
-            </div>
-          </div>
-
-          <div class="md:col-span-2">
-            <div id="billCard" class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl">
-              <div class="border-b border-slate-800 pb-4 mb-4 flex justify-between items-start">
-                <div>
-                  <h1 class="text-xl font-extrabold text-emerald-400 tracking-wider">IDIYAPPAM BILL</h1>
-                  <p class="text-xs text-slate-400 font-bold mt-0.5">${state.db.settings.businessName}</p>
-                  <p class="text-[11px] text-slate-500">Ph: ${state.db.settings.businessPhone} | UPI: ${state.db.settings.upiId}</p>
-                </div>
-                <div class="text-right">
-                  <span class="text-xs font-bold text-slate-300 block">${selectedCustomer.name}</span>
-                  <span class="text-[11px] text-slate-500">${selectedCustomer.ownerPhone}</span>
-                </div>
-              </div>
-
-              <table class="w-full text-left text-xs mb-6">
-                <thead>
-                  <tr class="border-b border-slate-800 text-slate-400 font-semibold">
-                    <th class="py-2">Date</th>
-                    <th class="py-2">Shift</th>
-                    <th class="py-2 text-center">Pieces</th>
-                    <th class="py-2 text-right">Rate</th>
-                    <th class="py-2 text-right">Amount</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-800/60 text-slate-200">
-                  ${filteredOrders.length === 0 ? '<tr><td colspan="5" class="py-4 text-center text-slate-500">No delivered orders in this period.</td></tr>' : ''}
-                  ${filteredOrders.map(o => `
-                    <tr>
-                      <td class="py-2.5">${o.date}</td>
-                      <td class="py-2.5 capitalize">${o.shift}</td>
-                      <td class="py-2.5 text-center font-semibold">${o.pieces}</td>
-                      <td class="py-2.5 text-right text-slate-400">₹${o.unitRateApplied}</td>
-                      <td class="py-2.5 text-right font-bold text-emerald-400">₹${o.amount}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-
-              <div class="border-t-2 border-slate-800 pt-4 flex justify-between items-center">
-                <div>
-                  <p class="text-xs text-slate-400">Total Pieces Supplied</p>
-                  <p class="text-lg font-bold text-white">${billPieces} Pcs</p>
-                </div>
-                <div class="text-right">
-                  <p class="text-xs text-slate-400">TOTAL AMOUNT DUE</p>
-                  <p class="text-2xl font-extrabold text-emerald-400 secret-number">${formatRupee(billTotal)}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
+      return h;
     }
 
-    // SHOPS
     function renderShops() {
-      return `
-        <div class="glass p-5 rounded-2xl">
-          <div class="flex justify-between items-center mb-6">
-            <div>
-              <h2 class="text-lg font-bold text-white">Shops & Customer Directory</h2>
-              <p class="text-xs text-gray-400">Manage rates, delivery settings, and shop details</p>
-            </div>
-            <button onclick="openAddShopModal()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 font-bold text-white text-xs rounded-xl shadow-lg shadow-emerald-500/20">
-              + Add New Shop
-            </button>
-          </div>
+      var h = '<div class="glass p-5 rounded-2xl">';
+      h += '  <div class="flex justify-between items-center mb-6">';
+      h += '    <h2 class="text-lg font-bold text-white">Shops & Customers</h2>';
+      h += '    <button onclick="toggleModal(true)" class="px-3 py-2 bg-emerald-500 font-bold text-white text-xs rounded-xl">+ Add New Shop</button>';
+      h += '  </div>';
+      h += '  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+      for (var i = 0; i < appState.db.customers.length; i++) {
+        var c = appState.db.customers[i];
+        h += '    <div class="glass-card p-4 rounded-xl flex justify-between items-center">';
+        h += '      <div><h3 class="font-bold text-white">' + c.name + '</h3><p class="text-xs text-gray-400">Phone: ' + c.ownerPhone + '</p><p class="text-xs text-emerald-400 mt-1">Rate: ₹' + c.unitRate + '/pc</p></div>';
+        h += '      <span class="text-xs font-bold px-2 py-1 rounded bg-emerald-500/20 text-emerald-400">' + (c.isActive ? 'Active' : 'Inactive') + '</span>';
+        h += '    </div>';
+      }
+      h += '  </div>';
+      h += '</div>';
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            ${state.db.customers.map(c => `
-              <div class="glass-card p-4 rounded-xl flex justify-between items-start">
-                <div>
-                  <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">${c.type}</span>
-                  <h3 class="font-bold text-white text-base mt-1">${c.name}</h3>
-                  <p class="text-xs text-gray-400 mt-0.5">Phone: ${c.ownerPhone}</p>
-                  <p class="text-xs text-emerald-400 font-semibold mt-1">Default Rate: ₹${c.unitRate}/piece</p>
-                  <p class="text-[11px] text-gray-500 mt-1">Defaults: Morning ${c.defaultMorningQty} Pcs \vert{} Evening${c.defaultEveningQty} Pcs</p>
-                </div>
-                <button onclick="toggleShopStatus('${c.id}')" class="text-xs font-semibold px-2.5 py-1 rounded-lg ${c.isActive ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">
-                  ${c.isActive ? 'Active' : 'Inactive'}
-                </button>
-              </div>
-            `).join('')}
-          </div>
-        </div>
+      if (appState.showModal) {
+        h += '<div class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">';
+        h += '  <div class="glass p-6 rounded-2xl w-full max-w-md space-y-4">';
+        h += '    <h3 class="text-lg font-bold text-white">Add New Shop</h3>';
+        h += '    <input id="shopName" type="text" placeholder="Shop Name" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">';
+        h += '    <input id="shopPhone" type="text" placeholder="Phone Number" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">';
+        h += '    <input id="shopRate" type="number" value="7" placeholder="Unit Rate" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">';
+        h += '    <div class="flex justify-end gap-2 pt-2">';
+        h += '      <button onclick="toggleModal(false)" class="px-4 py-2 bg-gray-800 text-xs rounded-xl text-gray-300">Cancel</button>';
+        h += '      <button onclick="saveShop()" class="px-4 py-2 bg-emerald-500 text-xs rounded-xl text-white font-bold">Save Shop</button>';
+        h += '    </div>';
+        h += '  </div>';
+        h += '</div>';
+      }
 
-        ${state.showAddShopModal ? `
-          <div class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div class="glass p-6 rounded-2xl w-full max-w-md space-y-4">
-              <h3 class="text-lg font-bold text-white">Add New Hotel / Shop</h3>
-              <div>
-                <label class="text-xs text-gray-400 block mb-1">Shop Name</label>
-                <input id="newShopName" type="text" placeholder="e.g. Hotel Annapoorna" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">
-              </div>
-              <div>
-                <label class="text-xs text-gray-400 block mb-1">Owner Phone Number</label>
-                <input id="newShopPhone" type="text" placeholder="e.g. 9842100000" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">
-              </div>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="text-xs text-gray-400 block mb-1">Unit Rate (₹)</label>
-                  <input id="newShopRate" type="number" value="7" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">
-                </div>
-                <div>
-                  <label class="text-xs text-gray-400 block mb-1">Type</label>
-                  <select id="newShopType" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">
-                    <option value="hotel">Hotel</option>
-                    <option value="restaurant">Restaurant</option>
-                    <option value="catering">Catering</option>
-                  </select>
-                </div>
-              </div>
-              <div class="flex justify-end gap-3 pt-4">
-                <button onclick="closeAddShopModal()" class="px-4 py-2 bg-gray-800 text-gray-300 text-xs rounded-xl">Cancel</button>
-                <button onclick="saveNewShop()" class="px-4 py-2 bg-emerald-500 text-white font-bold text-xs rounded-xl">Save Shop</button>
-              </div>
-            </div>
-          </div>
-        ` : ''}
-      `;
+      return h;
     }
 
-    // REPORTS
-    function renderReports() {
-      return `
-        <div class="glass p-5 rounded-2xl">
-          <h2 class="text-lg font-bold text-white mb-4">Business Analytics & Reports</h2>
-          <p class="text-xs text-gray-400 mb-6">Filter sales and revenue by shop and period.</p>
-          <div class="space-y-4">
-            <div class="flex gap-4">
-              <select class="bg-gray-900 border border-gray-700 text-white text-xs rounded-xl px-3 py-2">
-                <option value="all">All Shops</option>
-                ${state.db.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
-              </select>
-              <button onclick="alert('Exporting Report to CSV...')" class="px-4 py-2 bg-emerald-500 text-white font-bold text-xs rounded-xl">
-                Export CSV
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    // BACKUP & RESTORE
     function renderBackup() {
-      return `
-        <div class="glass p-5 rounded-2xl space-y-6">
-          <div>
-            <h2 class="text-lg font-bold text-white">Backup & Restore Engine</h2>
-            <p class="text-xs text-gray-400">Safeguard your data or restore from a JSON backup file.</p>
-          </div>
-
-          <div class="glass-card p-4 rounded-xl space-y-2">
-            <h3 class="font-bold text-white text-sm">1. Export JSON Backup</h3>
-            <p class="text-xs text-gray-400">Download all customers, orders, expenses, and payments into a single JSON file.</p>
-            <button onclick="exportJSONBackup()" class="mt-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 font-bold text-white text-xs rounded-xl shadow-lg shadow-emerald-500/20">
-              📥 Download Backup (.json)
-            </button>
-          </div>
-
-          <div class="glass-card p-4 rounded-xl space-y-3">
-            <h3 class="font-bold text-white text-sm">2. Restore Data from Backup</h3>
-            <p class="text-xs text-gray-400">Upload a valid .json backup file to restore database state.</p>
-            <input type="file" id="restoreFile" accept=".json" onchange="previewBackupFile(event)" class="block w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-gray-800 file:text-emerald-400 hover:file:bg-gray-700">
-
-            ${state.restorePreviewData ? `
-              <div class="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl space-y-2">
-                <p class="text-xs text-emerald-400 font-bold">✓ Valid Backup File Preview:</p>
-                <p class="text-xs text-gray-300">Shops: ${state.restorePreviewData.customers?.length || 0} | Orders: ${state.restorePreviewData.orders?.length \vert{}\vert{} 0} \vert{} Payments: ${state.restorePreviewData.payments?.length || 0}</p>
-                <div class="flex gap-3 pt-2">
-                  <button onclick="confirmRestore()" class="px-3 py-1.5 bg-emerald-500 text-white font-bold text-xs rounded-lg">Confirm Restore (Replace)</button>
-                  <button onclick="state.restorePreviewData = null; renderApp();" class="px-3 py-1.5 bg-gray-800 text-gray-300 text-xs rounded-lg">Cancel</button>
-                </div>
-              </div>
-            ` : ''}
-          </div>
-        </div>
-      `;
+      var h = '<div class="glass p-5 rounded-2xl space-y-6">';
+      h += '  <div><h2 class="text-lg font-bold text-white">Backup & Restore</h2><p class="text-xs text-gray-400">Export or restore your business records.</p></div>';
+      h += '  <div class="glass-card p-4 rounded-xl space-y-2">';
+      h += '    <h3 class="font-bold text-white text-sm">Download JSON Backup</h3>';
+      h += '    <button onclick="exportData()" class="px-4 py-2 bg-emerald-500 font-bold text-white text-xs rounded-xl">📥 Export Backup (.json)</button>';
+      h += '  </div>';
+      h += '</div>';
+      return h;
     }
 
-    // ACTIONS
-    function setTab(tab) { state.currentTab = tab; renderApp(); }
-    function toggleLanguage() { state.db.settings.language = state.db.settings.language === 'en' ? 'ta' : 'en'; saveData(state.db); renderApp(); }
-    function toggleHideNumbers() { state.db.settings.hideConfidential = !state.db.settings.hideConfidential; saveData(state.db); renderApp(); }
-    function updateDashFilter(key, val) { state.dashFilter[key] = val; renderApp(); }
-    function updateBillFilter(key, val) { state.billFilter[key] = val; renderApp(); }
+    // Handlers
+    function switchTab(t) { appState.tab = t; render(); }
+    function togglePrivacy() { appState.db.settings.hideConfidential = !appState.db.settings.hideConfidential; saveDB(appState.db); render(); }
+    function setDashShop(val) { appState.dashShop = val; render(); }
+    function setBillShop(val) { appState.billShop = val; render(); }
+    function toggleModal(show) { appState.showModal = show; render(); }
 
-    function sendWhatsAppBill(shopId, phone, pieces, amount) {
-      const shop = state.db.customers.find(c => c.id === shopId);
-      const text = "*IDIYAPPAM BILL - " + state.db.settings.businessName + "*\n\nCustomer: " + shop.name + "\nTotal Pieces Supplied: " + pieces + "\n*Total Amount Due: ₹" + amount + "*\n\nPlease make payment via UPI to: " + state.db.settings.upiId + "\nThank you!";
-      const url = "https://wa.me/91" + phone + "?text=" + encodeURIComponent(text);
-      window.open(url, '_blank');
-    }
+    function saveShop() {
+      var name = document.getElementById('shopName').value;
+      var phone = document.getElementById('shopPhone').value;
+      var rate = Number(document.getElementById('shopRate').value) || 7;
+      if (!name) return alert("Enter shop name");
 
-    function downloadBillPNG() {
-      const card = document.getElementById('billCard');
-      html2canvas(card, { scale: 2 }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = "idiyappam-bill.png";
-        link.href = canvas.toDataURL();
-        link.click();
-      });
-    }
-
-    function openAddShopModal() { state.showAddShopModal = true; renderApp(); }
-    function closeAddShopModal() { state.showAddShopModal = false; renderApp(); }
-
-    function saveNewShop() {
-      const name = document.getElementById('newShopName').value;
-      const phone = document.getElementById('newShopPhone').value;
-      const rate = Number(document.getElementById('newShopRate').value) || 7;
-      const type = document.getElementById('newShopType').value;
-
-      if (!name) return alert("Please enter shop name");
-
-      const newCust = {
-        id: 'c' + (Date.now()),
+      appState.db.customers.push({
+        id: 'c' + Date.now(),
         name: name,
-        type: type,
         ownerPhone: phone || '9842100000',
         unitRate: rate,
         defaultMorningQty: 100,
         defaultEveningQty: 50,
         isActive: true
-      };
+      });
 
-      state.db.customers.push(newCust);
-      saveData(state.db);
-      closeAddShopModal();
+      saveDB(appState.db);
+      toggleModal(false);
     }
 
-    function toggleShopStatus(id) {
-      const cust = state.db.customers.find(c => c.id === id);
-      if (cust) {
-        cust.isActive = !cust.isActive;
-        saveData(state.db);
-        renderApp();
-      }
+    function shareWhatsApp(name, phone, pcs, amt) {
+      var msg = "*IDIYAPPAM BILL - " + appState.db.settings.businessName + "*\n\nShop: " + name + "\nTotal Pieces: " + pcs + "\n*Total Amount Due: ₹" + amt + "*\n\nThank you!";
+      window.open("https://wa.me/91" + phone + "?text=" + encodeURIComponent(msg), '_blank');
     }
 
-    function exportJSONBackup() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.db, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", "srisai-backup-" + (new Date().toISOString().slice(0,10)) + ".json");
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
+    function exportData() {
+      var str = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState.db, null, 2));
+      var a = document.createElement('a');
+      a.setAttribute("href", str);
+      a.setAttribute("download", "srisai-backup.json");
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
     }
 
-    function previewBackupFile(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const parsed = JSON.parse(e.target.result);
-          if (parsed.customers && parsed.orders) {
-            state.restorePreviewData = parsed;
-            renderApp();
-          } else {
-            alert("Invalid backup file structure.");
-          }
-        } catch(err) {
-          alert("Error reading JSON file.");
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    function confirmRestore() {
-      if (state.restorePreviewData) {
-        state.db = state.restorePreviewData;
-        saveData(state.db);
-        state.restorePreviewData = null;
-        alert("Database restored successfully!");
-        renderApp();
-      }
-    }
-
-    renderApp();
+    render();
   </script>
 </body>
 </html>
