@@ -37,7 +37,7 @@
   <div id="app" class="max-w-7xl mx-auto px-4 py-4"></div>
 
   <script>
-    // 1. Firebase Credentials
+    // Firebase Credentials
     var firebaseConfig = {
       apiKey: "AIzaSyBE04f1-vwEbhkCxX-o_xU62aXTTok-AB4",
       authDomain: "sri-sai-home-foods-30fdb.firebaseapp.com",
@@ -57,36 +57,40 @@
       console.log("Firebase fallback mode.");
     }
 
-    var STORAGE_KEY = 'srisai_production_v1';
+    var STORAGE_KEY = 'srisai_production_v8';
 
     var initialData = {
       settings: {
         businessName: "Sri Sai Home Foods",
         ownerPhone: "9842100000",
         upiId: "srisaihomefoods@upi",
-        hideConfidential: true,
+        hideConfidential: false,
         language: "en"
       },
       customers: [
-        { id: 'c1', name: 'Hotel Annapoorna', type: 'hotel', ownerPhone: '9842100001', unitRate: 7, defaultMorningQty: 100, defaultEveningQty: 80, isActive: true },
-        { id: 'c2', name: 'Hotel Saravana Bhavan', type: 'hotel', ownerPhone: '9842100002', unitRate: 6, defaultMorningQty: 150, defaultEveningQty: 120, isActive: true },
-        { id: 'c3', name: 'Sangeetha Restaurant', type: 'restaurant', ownerPhone: '9842100003', unitRate: 6, defaultMorningQty: 80, defaultEveningQty: 60, isActive: true },
-        { id: 'c4', name: 'Sri Ram Caterers', type: 'catering', ownerPhone: '9842100004', unitRate: 7, defaultMorningQty: 200, defaultEveningQty: 0, isActive: true }
+        { id: 'c1', name: 'Hotel Annapoorna', type: 'hotel', ownerPhone: '9842100001', unitRate: 7, defaultMorningQty: 100, defaultEveningQty: 80, address: 'Main Road, Town Center', isActive: true },
+        { id: 'c2', name: 'Hotel Saravana Bhavan', type: 'hotel', ownerPhone: '9842100002', unitRate: 6, defaultMorningQty: 150, defaultEveningQty: 120, address: 'Bus Stand Complex', isActive: true },
+        { id: 'c3', name: 'Sangeetha Restaurant', type: 'restaurant', ownerPhone: '9842100003', unitRate: 6, defaultMorningQty: 80, defaultEveningQty: 60, address: 'Bypass Junction', isActive: true },
+        { id: 'c4', name: 'Sri Ram Caterers', type: 'catering', ownerPhone: '9842100004', unitRate: 7, defaultMorningQty: 200, defaultEveningQty: 0, address: 'Gandhi Nagar', isActive: true }
       ],
       orders: [
         { id: 'o1', customerId: 'c1', date: '2026-10-12', shift: 'morning', pieces: 100, unitRateApplied: 7, amount: 700, deliveryStatus: 'delivered', rapidoCharge: 40 },
         { id: 'o2', customerId: 'c2', date: '2026-10-12', shift: 'morning', pieces: 150, unitRateApplied: 6, amount: 900, deliveryStatus: 'delivered', rapidoCharge: 50 },
         { id: 'o3', customerId: 'c1', date: '2026-10-13', shift: 'morning', pieces: 100, unitRateApplied: 7, amount: 700, deliveryStatus: 'delivered', rapidoCharge: 40 },
         { id: 'o4', customerId: 'c2', date: '2026-10-13', shift: 'morning', pieces: 150, unitRateApplied: 6, amount: 900, deliveryStatus: 'delivered', rapidoCharge: 50 },
-        { id: 'o5', customerId: 'c3', date: '2026-10-13', shift: 'morning', pieces: 80, unitRateApplied: 6, amount: 480, deliveryStatus: 'delivered', rapidoCharge: 30 }
+        { id: 'o5', customerId: 'c3', date: '2026-10-13', shift: 'morning', pieces: 80, unitRateApplied: 6, amount: 480, deliveryStatus: 'delivered', rapidoCharge: 30 },
+        { id: 'o6', customerId: 'c1', date: '2026-10-14', shift: 'morning', pieces: 100, unitRateApplied: 7, amount: 700, deliveryStatus: 'delivered', rapidoCharge: 40 },
+        { id: 'o7', customerId: 'c2', date: '2026-10-14', shift: 'morning', pieces: 150, unitRateApplied: 6, amount: 900, deliveryStatus: 'delivered', rapidoCharge: 50 },
+        { id: 'o8', customerId: 'c4', date: '2026-10-14', shift: 'morning', pieces: 120, unitRateApplied: 7, amount: 840, deliveryStatus: 'delivered', rapidoCharge: 0 }
       ],
       payments: [
         { id: 'p1', customerId: 'c1', date: '2026-10-12', amount: 700, mode: 'UPI' },
         { id: 'p2', customerId: 'c2', date: '2026-10-10', amount: 1000, mode: 'Cash' }
       ],
       expenses: [
-        { id: 'e1', category: 'Rice Flour', amount: 1200, date: '2026-10-10', note: '50kg Bag' },
-        { id: 'e2', category: 'Rapido / Porter', amount: 210, date: '2026-10-12', note: 'Delivery charges' }
+        { id: 'e1', category: 'Rice Flour', amount: 1200, date: '2026-10-10', customerId: '', note: '50kg Bag' },
+        { id: 'e2', category: 'Rapido / Porter', amount: 210, date: '2026-10-12', customerId: 'c2', note: 'Delivery charges for Saravana Bhavan' },
+        { id: 'e3', category: 'Shop Rent', amount: 5000, date: '2026-10-01', customerId: '', note: 'Monthly shop rent' }
       ]
     };
 
@@ -109,10 +113,17 @@
     var appState = {
       db: loadDB(),
       tab: 'dashboard',
+      orderDate: '2026-10-14',
+      orderShift: 'morning',
       dashShop: 'all',
+      dashDateMode: 'all',
+      dashStartDate: '2026-10-01',
+      dashEndDate: '2026-10-14',
       billShop: 'c1',
       showModal: false,
-      restorePreview: null
+      editingShopId: null,
+      showExpenseModal: false,
+      expenseFilterCategory: 'all'
     };
 
     if (dbCloud) {
@@ -170,12 +181,30 @@
       html += '</main>';
 
       container.innerHTML = html;
+      
+      if (appState.tab === 'orders') {
+        recalculateOrderTotals();
+      }
     }
 
     function renderDashboard() {
       var orders = appState.db.orders.filter(function(o){ return o.deliveryStatus === 'delivered'; });
+
+      // Apply Shop Filter
       if (appState.dashShop !== 'all') {
         orders = orders.filter(function(o){ return o.customerId === appState.dashShop; });
+      }
+
+      // Apply Date Filter
+      var todayStr = '2026-10-14';
+      if (appState.dashDateMode === 'today') {
+        orders = orders.filter(function(o){ return o.date === todayStr; });
+      } else if (appState.dashDateMode === 'thisWeek') {
+        orders = orders.filter(function(o){ return o.date >= '2026-10-12' && o.date <= '2026-10-18'; });
+      } else if (appState.dashDateMode === 'thisMonth') {
+        orders = orders.filter(function(o){ return o.date >= '2026-10-01' && o.date <= '2026-10-31'; });
+      } else if (appState.dashDateMode === 'custom' && appState.dashStartDate && appState.dashEndDate) {
+        orders = orders.filter(function(o){ return o.date >= appState.dashStartDate && o.date <= appState.dashEndDate; });
       }
 
       var rev = orders.reduce(function(s, o){ return s + o.amount; }, 0);
@@ -184,57 +213,366 @@
       var totalDelivered = appState.db.orders.filter(function(o){ return o.deliveryStatus === 'delivered'; }).reduce(function(s, o){ return s + o.amount; }, 0);
       var dues = totalDelivered - paid;
 
-      var h = '';
-      h += '<div class="glass p-4 rounded-2xl mb-6 flex items-center justify-between">';
-      h += '  <span class="text-xs text-gray-400 font-bold">Filter Shop:</span>';
-      h += '  <select onchange="setDashShop(this.value)" class="bg-gray-900 border border-gray-700 text-white text-xs rounded-xl px-3 py-2">';
-      h += '    <option value="all">All Shops</option>';
-      for (var i = 0; i < appState.db.customers.length; i++) {
-        var c = appState.db.customers[i];
-        h += '    <option value="' + c.id + '" ' + (appState.dashShop === c.id ? 'selected' : '') + '>' + c.name + '</option>';
+      // Group by Shop for Pie Chart
+      var shopRevenueMap = {};
+      var colors = ['#10b981', '#06b6d4', '#f59e0b', '#ec4899', '#8b5cf6', '#6366f1'];
+      for (var i = 0; i < orders.length; i++) {
+        var ord = orders[i];
+        shopRevenueMap[ord.customerId] = (shopRevenueMap[ord.customerId] || 0) + ord.amount;
       }
-      h += '  </select>';
+
+      // Group by Date for Trend Bar Chart
+      var dateMap = {};
+      for (var d = 0; d < orders.length; d++) {
+        var oDate = orders[d].date;
+        dateMap[oDate] = (dateMap[oDate] || 0) + orders[d].amount;
+      }
+      var sortedDates = Object.keys(dateMap).sort();
+      var maxDailyRev = Math.max.apply(Math, Object.values(dateMap).concat([1000]));
+
+      var h = '';
+
+      // 1. FILTER CONTROLS BAR
+      h += '<div class="glass p-4 rounded-2xl mb-6 space-y-4">';
+      h += '  <div class="flex flex-wrap items-center justify-between gap-4">';
+      
+      // Shop Dropdown
+      h += '    <div class="flex items-center gap-2">';
+      h += '      <label class="text-xs text-gray-400 font-bold">Filter Shop:</label>';
+      h += '      <select onchange="setDashShop(this.value)" class="bg-gray-900 border border-gray-700 text-white text-xs rounded-xl px-3 py-2 font-semibold">';
+      h += '        <option value="all">All Shops</option>';
+      for (var j = 0; j < appState.db.customers.length; j++) {
+        var c = appState.db.customers[j];
+        h += '        <option value="' + c.id + '" ' + (appState.dashShop === c.id ? 'selected' : '') + '>' + c.name + '</option>';
+      }
+      h += '      </select>';
+      h += '    </div>';
+
+      // Date Range Dropdown
+      h += '    <div class="flex items-center gap-2 flex-wrap">';
+      h += '      <label class="text-xs text-gray-400 font-bold">Date Range:</label>';
+      h += '      <select onchange="setDashDateMode(this.value)" class="bg-gray-900 border border-gray-700 text-white text-xs rounded-xl px-3 py-2 font-semibold">';
+      h += '        <option value="all" ' + (appState.dashDateMode === 'all' ? 'selected' : '') + '>All Time</option>';
+      h += '        <option value="today" ' + (appState.dashDateMode === 'today' ? 'selected' : '') + '>Today</option>';
+      h += '        <option value="thisWeek" ' + (appState.dashDateMode === 'thisWeek' ? 'selected' : '') + '>This Week</option>';
+      h += '        <option value="thisMonth" ' + (appState.dashDateMode === 'thisMonth' ? 'selected' : '') + '>This Month</option>';
+      h += '        <option value="custom" ' + (appState.dashDateMode === 'custom' ? 'selected' : '') + '>Custom Range</option>';
+      h += '      </select>';
+      h += '    </div>';
+
+      h += '  </div>';
+
+      if (appState.dashDateMode === 'custom') {
+        h += '  <div class="flex items-center gap-3 pt-2 border-t border-gray-800">';
+        h += '    <span class="text-xs text-gray-400 font-semibold">From:</span>';
+        h += '    <input type="date" value="' + appState.dashStartDate + '" onchange="setDashStartDate(this.value)" class="bg-gray-900 border border-gray-700 text-white text-xs rounded-xl px-3 py-1.5 font-semibold">';
+        h += '    <span class="text-xs text-gray-400 font-semibold">To:</span>';
+        h += '    <input type="date" value="' + appState.dashEndDate + '" onchange="setDashEndDate(this.value)" class="bg-gray-900 border border-gray-700 text-white text-xs rounded-xl px-3 py-1.5 font-semibold">';
+        h += '  </div>';
+      }
+
       h += '</div>';
 
+      // 2. KPI CARDS
       h += '<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">';
-      h += '  <div class="glass-card p-4 rounded-2xl border-l-4 border-emerald-500"><p class="text-xs text-gray-400">PIECES SUPPLIED</p><p class="text-2xl font-bold text-white mt-1 secret-number">' + pcs + '</p></div>';
-      h += '  <div class="glass-card p-4 rounded-2xl border-l-4 border-teal-500"><p class="text-xs text-gray-400">TOTAL REVENUE</p><p class="text-2xl font-bold text-emerald-400 mt-1 secret-number">' + formatMoney(rev) + '</p></div>';
-      h += '  <div class="glass-card p-4 rounded-2xl border-l-4 border-rose-500"><p class="text-xs text-gray-400">TOTAL DUES OWED</p><p class="text-2xl font-bold text-rose-400 mt-1 secret-number">' + formatMoney(dues) + '</p></div>';
-      h += '  <div class="glass-card p-4 rounded-2xl border-l-4 border-sky-500"><p class="text-xs text-gray-400">COLLECTED CASH</p><p class="text-2xl font-bold text-sky-400 mt-1 secret-number">' + formatMoney(paid) + '</p></div>';
+      h += '  <div class="glass-card p-4 rounded-2xl border-l-4 border-emerald-500"><p class="text-xs text-gray-400 font-bold">PIECES SUPPLIED</p><p class="text-2xl font-bold text-white mt-1 secret-number">' + pcs.toLocaleString('en-IN') + '</p></div>';
+      h += '  <div class="glass-card p-4 rounded-2xl border-l-4 border-teal-500"><p class="text-xs text-gray-400 font-bold">FILTERED REVENUE</p><p class="text-2xl font-bold text-emerald-400 mt-1 secret-number">' + formatMoney(rev) + '</p></div>';
+      h += '  <div class="glass-card p-4 rounded-2xl border-l-4 border-rose-500"><p class="text-xs text-gray-400 font-bold">TOTAL DUES OWED</p><p class="text-2xl font-bold text-rose-400 mt-1 secret-number">' + formatMoney(dues) + '</p></div>';
+      h += '  <div class="glass-card p-4 rounded-2xl border-l-4 border-sky-500"><p class="text-xs text-gray-400 font-bold">COLLECTED CASH</p><p class="text-2xl font-bold text-sky-400 mt-1 secret-number">' + formatMoney(paid) + '</p></div>';
+      h += '</div>';
+
+      // 3. PIE CHART SECTION
+      h += '<div class="glass p-5 rounded-2xl mb-6">';
+      h += '  <h2 class="text-md font-bold text-white mb-4">Shop Revenue Share (Pie Breakdown)</h2>';
+      
+      var shopKeys = Object.keys(shopRevenueMap);
+      if (shopKeys.length === 0) {
+        h += '  <p class="text-xs text-gray-500 text-center py-6">No sales data found for the selected filters.</p>';
+      } else {
+        var svgArcs = '';
+        var cumulativeAngle = 0;
+        var colorIdx = 0;
+
+        for (var k = 0; k < shopKeys.length; k++) {
+          var cid = shopKeys[k];
+          var val = shopRevenueMap[cid];
+          var percentage = rev > 0 ? (val / rev) : 0;
+          var angle = percentage * 360;
+
+          var x1 = 50 + 40 * Math.cos(Math.PI * (cumulativeAngle - 90) / 180);
+          var y1 = 50 + 40 * Math.sin(Math.PI * (cumulativeAngle - 90) / 180);
+
+          cumulativeAngle += angle;
+
+          var x2 = 50 + 40 * Math.cos(Math.PI * (cumulativeAngle - 90) / 180);
+          var y2 = 50 + 40 * Math.sin(Math.PI * (cumulativeAngle - 90) / 180);
+
+          var largeArcFlag = angle > 180 ? 1 : 0;
+          var color = colors[colorIdx % colors.length];
+          colorIdx++;
+
+          if (shopKeys.length === 1) {
+            svgArcs += '<circle cx="50" cy="50" r="40" fill="' + color + '" />';
+          } else {
+            svgArcs += '<path d="M 50 50 L ' + x1 + ' ' + y1 + ' A 40 40 0 ' + largeArcFlag + ' 1 ' + x2 + ' ' + y2 + ' Z" fill="' + color + '" />';
+          }
+        }
+
+        h += '  <div class="flex flex-col md:flex-row items-center justify-around gap-6">';
+        h += '    <div class="w-44 h-44 relative flex items-center justify-center shrink-0">';
+        h += '      <svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90 rounded-full overflow-hidden">' + svgArcs + '</svg>';
+        h += '    </div>';
+
+        h += '    <div class="space-y-2.5 w-full flex-1 max-w-md">';
+        colorIdx = 0;
+        for (var l = 0; l < shopKeys.length; l++) {
+          var custId = shopKeys[l];
+          var custObj = appState.db.customers.find(function(c){ return c.id === custId; }) || { name: 'Unknown' };
+          var shopVal = shopRevenueMap[custId];
+          var pctVal = Math.round((shopVal / rev) * 100);
+          var clr = colors[colorIdx % colors.length];
+          colorIdx++;
+
+          h += '      <div class="flex justify-between items-center glass-card p-2.5 rounded-xl text-xs">';
+          h += '        <div class="flex items-center gap-2">';
+          h += '          <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ' + clr + '"></span>';
+          h += '          <span class="text-white font-semibold">' + custObj.name + '</span>';
+          h += '        </div>';
+          h += '        <span class="text-emerald-400 font-bold secret-number">' + formatMoney(shopVal) + ' (' + pctVal + '%)</span>';
+          h += '      </div>';
+        }
+        h += '    </div>';
+        h += '  </div>';
+      }
+
+      h += '</div>';
+
+      // 4. DAILY REVENUE TREND MONITOR (BAR CHART)
+      h += '<div class="glass p-5 rounded-2xl">';
+      h += '  <div class="flex justify-between items-center mb-4">';
+      h += '    <h2 class="text-md font-bold text-white">Revenue Monitor (Daily Sales)</h2>';
+      h += '    <span class="text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded font-bold">Delivered Orders</span>';
+      h += '  </div>';
+
+      if (sortedDates.length === 0) {
+        h += '  <p class="text-xs text-gray-500 text-center py-6">No delivered orders for the selected range.</p>';
+      } else {
+        h += '  <div class="h-44 w-full flex items-end gap-3 pt-6 pb-2 border-b border-gray-800 overflow-x-auto">';
+        for (var dt = 0; dt < sortedDates.length; dt++) {
+          var dateKey = sortedDates[dt];
+          var dayRevenue = dateMap[dateKey];
+          var barHeightPct = Math.max(Math.round((dayRevenue / maxDailyRev) * 100), 12);
+
+          h += '    <div class="flex-1 min-w-[48px] flex flex-col items-center gap-1.5 group">';
+          h += '      <span class="text-[10px] text-emerald-400 font-bold secret-number opacity-80 group-hover:opacity-100 transition-opacity">₹' + dayRevenue + '</span>';
+          h += '      <div class="w-full bg-emerald-500/80 hover:bg-emerald-400 rounded-t-lg transition-all" style="height: ' + barHeightPct + '%"></div>';
+          h += '      <span class="text-[10px] text-gray-400 font-semibold">' + dateKey.slice(5) + '</span>';
+          h += '    </div>';
+        }
+        h += '  </div>';
+      }
+
       h += '</div>';
 
       return h;
     }
 
+    function setDashShop(val) { appState.dashShop = val; render(); }
+    function setDashDateMode(val) { appState.dashDateMode = val; render(); }
+    function setDashStartDate(val) { appState.dashStartDate = val; render(); }
+    function setDashEndDate(val) { appState.dashEndDate = val; render(); }
+
     function renderOrders() {
-      var h = '<div class="glass p-5 rounded-2xl"><h2 class="text-lg font-bold text-white mb-4">Quick Shift Order Entry</h2><div class="space-y-4">';
+      var d = new Date(appState.orderDate);
+      var isTuesday = d.getDay() === 2;
+      if (isTuesday && appState.orderShift === 'evening') {
+        appState.orderShift = 'morning';
+      }
+
+      var h = '<div class="glass p-5 rounded-2xl space-y-6">';
+      h += '  <div>';
+      h += '    <h2 class="text-lg font-bold text-white mb-1">Quick Shift Order Entry</h2>';
+      h += '    <p class="text-xs text-gray-400">Enter pieces supplied and Rapido/Porter charges paid by you.</p>';
+      h += '  </div>';
+
+      h += '  <div class="glass-card p-4 rounded-xl flex flex-wrap items-center justify-between gap-4">';
+      h += '    <div class="flex items-center gap-2">';
+      h += '      <label class="text-xs text-gray-400 font-bold">Order Date:</label>';
+      h += '      <input type="date" value="' + appState.orderDate + '" onchange="setOrderDate(this.value)" class="bg-gray-900 border border-gray-700 text-white text-xs rounded-xl px-3 py-2 font-semibold">';
+      h += '    </div>';
+
+      h += '    <div class="flex items-center gap-2">';
+      h += '      <span class="text-xs text-gray-400 font-bold mr-1">Shift:</span>';
+      
+      var isMorn = appState.orderShift === 'morning';
+      h += '      <button onclick="setOrderShift(\'morning\')" class="px-4 py-2 rounded-xl text-xs font-bold transition-all ' + (isMorn ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-gray-800 text-gray-400') + '">☀️ MORNING</button>';
+
+      var isEve = appState.orderShift === 'evening';
+      if (isTuesday) {
+        h += '      <button disabled class="px-4 py-2 rounded-xl text-xs font-bold bg-gray-800/40 text-gray-600 cursor-not-allowed">🌙 EVENING (TUESDAY OFF)</button>';
+      } else {
+        h += '      <button onclick="setOrderShift(\'evening\')" class="px-4 py-2 rounded-xl text-xs font-bold transition-all ' + (isEve ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-gray-800 text-gray-400') + '">🌙 EVENING</button>';
+      }
+
+      h += '    </div>';
+      h += '  </div>';
+
+      h += '  <div class="space-y-4">';
       for (var i = 0; i < appState.db.customers.length; i++) {
         var c = appState.db.customers[i];
         if (!c.isActive) continue;
-        h += '<div class="glass-card p-4 rounded-xl flex justify-between items-center">';
-        h += '  <div><p class="font-bold text-white">' + c.name + '</p><p class="text-xs text-emerald-400">Rate: ₹' + c.unitRate + '/pc</p></div>';
-        h += '  <div class="flex items-center gap-3">';
-        h += '    <input type="number" value="' + c.defaultMorningQty + '" class="w-20 bg-gray-900 border border-gray-700 text-white text-center font-bold px-2 py-1.5 rounded-lg">';
-        h += '  </div>';
-        h += '</div>';
+
+        var defaultQty = appState.orderShift === 'morning' ? c.defaultMorningQty : c.defaultEveningQty;
+
+        h += '    <div class="glass-card p-4 rounded-xl flex flex-wrap md:flex-nowrap justify-between items-center gap-4">';
+        h += '      <div>';
+        h += '        <p class="font-bold text-white text-base">' + c.name + '</p>';
+        h += '        <p class="text-xs text-emerald-400 font-medium">Rate: ₹' + c.unitRate + '/piece</p>';
+        h += '      </div>';
+
+        h += '      <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">';
+        h += '        <div>';
+        h += '          <label class="text-[10px] text-gray-400 font-bold block mb-1">PIECES</label>';
+        h += '          <input id="qty_' + c.id + '" data-rate="' + c.unitRate + '" type="number" value="' + defaultQty + '" oninput="recalculateOrderTotals()" class="qty-input w-24 bg-gray-900 border border-gray-700 text-white text-center font-bold px-3 py-2 rounded-xl focus:border-emerald-500 outline-none">';
+        h += '        </div>';
+
+        h += '        <div>';
+        h += '          <label class="text-[10px] text-gray-400 font-bold block mb-1">RAPIDO/PORTER (₹)</label>';
+        h += '          <input id="rapido_' + c.id + '" type="number" placeholder="0" oninput="recalculateOrderTotals()" class="rapido-input w-24 bg-gray-900 border border-gray-700 text-amber-400 text-center font-bold px-3 py-2 rounded-xl focus:border-amber-500 outline-none">';
+        h += '        </div>';
+
+        h += '      </div>';
+        h += '    </div>';
       }
-      h += '<button onclick="alert(\'Shift Orders Saved!\')" class="w-full bg-emerald-500 font-bold text-white py-3 rounded-xl shadow-lg mt-4">SAVE SHIFT ORDERS</button>';
-      h += '</div></div>';
+
+      h += '  </div>';
+
+      h += '  <div class="glass-card p-4 rounded-xl border border-emerald-500/30 flex flex-wrap justify-between items-center gap-4 bg-emerald-950/20">';
+      h += '    <div>';
+      h += '      <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Shift Summary (' + appState.orderShift.toUpperCase() + ')</p>';
+      h += '      <p class="text-xs text-gray-400 mt-0.5">Live calculation of current entry</p>';
+      h += '    </div>';
+
+      h += '    <div class="flex items-center gap-6">';
+      h += '      <div class="text-center">';
+      h += '        <p class="text-[10px] text-gray-400 font-bold">TOTAL PIECES</p>';
+      h += '        <p id="totalPcsSummary" class="text-2xl font-extrabold text-white">0 Pcs</p>';
+      h += '      </div>';
+
+      h += '      <div class="text-center border-l border-gray-800 pl-6">';
+      h += '        <p class="text-[10px] text-gray-400 font-bold">TOTAL VALUE</p>';
+      h += '        <p id="totalValSummary" class="text-2xl font-extrabold text-emerald-400 secret-number">₹0</p>';
+      h += '      </div>';
+
+      h += '      <div class="text-center border-l border-gray-800 pl-6">';
+      h += '        <p class="text-[10px] text-gray-400 font-bold">DELIVERY CHARGES</p>';
+      h += '        <p id="totalRapidoSummary" class="text-2xl font-extrabold text-amber-400 secret-number">₹0</p>';
+      h += '      </div>';
+      h += '    </div>';
+      h += '  </div>';
+
+      h += '  <button onclick="saveOrdersBatch()" class="w-full bg-emerald-500 hover:bg-emerald-600 font-bold text-white py-3.5 rounded-xl shadow-lg shadow-emerald-500/20 text-sm tracking-wide">SAVE ' + appState.orderShift.toUpperCase() + ' SHIFT ORDERS</button>';
+      h += '</div>';
+
       return h;
+    }
+
+    function recalculateOrderTotals() {
+      var qtyInputs = document.querySelectorAll('.qty-input');
+      var rapidoInputs = document.querySelectorAll('.rapido-input');
+
+      var totalPcs = 0;
+      var totalVal = 0;
+      var totalRapido = 0;
+
+      qtyInputs.forEach(function(input) {
+        var pcs = Number(input.value) || 0;
+        var rate = Number(input.getAttribute('data-rate')) || 7;
+        totalPcs += pcs;
+        totalVal += (pcs * rate);
+      });
+
+      rapidoInputs.forEach(function(input) {
+        totalRapido += (Number(input.value) || 0);
+      });
+
+      var pcsElem = document.getElementById('totalPcsSummary');
+      var valElem = document.getElementById('totalValSummary');
+      var rapElem = document.getElementById('totalRapidoSummary');
+
+      if (pcsElem) pcsElem.innerText = totalPcs.toLocaleString('en-IN') + ' Pcs';
+      if (valElem) valElem.innerText = formatMoney(totalVal);
+      if (rapElem) rapElem.innerText = formatMoney(totalRapido);
     }
 
     function renderChecklist() {
-      var h = '<div class="glass p-5 rounded-2xl"><h2 class="text-lg font-bold text-white mb-4">Today\'s Delivery Checklist</h2><div class="space-y-3">';
+      var h = '<div class="glass p-5 rounded-2xl space-y-4">';
+      h += '  <div>';
+      h += '    <h2 class="text-lg font-bold text-white mb-1">Today\'s Delivery Checklist</h2>';
+      h += '    <p class="text-xs text-gray-400">Tap any item to toggle between Delivered and Pending (Undo anytime).</p>';
+      h += '  </div>';
+
+      h += '  <div class="space-y-3">';
       for (var i = 0; i < appState.db.customers.length; i++) {
         var c = appState.db.customers[i];
         if (!c.isActive) continue;
-        h += '<div class="glass-card p-4 rounded-xl flex justify-between items-center">';
-        h += '  <div><p class="font-bold text-white">' + c.name + '</p><p class="text-xs text-gray-400">' + c.defaultMorningQty + ' Pieces • Morning Shift</p></div>';
-        h += '  <button onclick="this.innerText=\'✓ DELIVERED\'; this.className=\'px-3 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-bold\'" class="px-3 py-1.5 bg-gray-800 text-gray-300 rounded-lg text-xs font-bold">MARK DELIVERED</button>';
-        h += '</div>';
+
+        var ord = appState.db.orders.find(function(o){ 
+          return o.customerId === c.id && o.date === appState.orderDate && o.shift === appState.orderShift; 
+        });
+
+        var pieces = ord ? ord.pieces : c.defaultMorningQty;
+        var isDelivered = ord && ord.deliveryStatus === 'delivered';
+
+        h += '    <div class="glass-card p-4 rounded-xl flex justify-between items-center transition-all ' + (isDelivered ? 'border-l-4 border-emerald-500' : 'border-l-4 border-gray-700') + '">';
+        h += '      <div>';
+        h += '        <p class="font-bold text-white text-base">' + c.name + '</p>';
+        h += '        <p class="text-xs text-gray-400 mt-0.5">' + pieces + ' Pieces • ' + appState.orderShift.toUpperCase() + ' SHIFT</p>';
+        h += '      </div>';
+
+        if (isDelivered) {
+          h += '      <button onclick="toggleDeliveryStatus(\'' + (ord ? ord.id : '') + '\', \'' + c.id + '\', false)" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-rose-500/20 hover:text-rose-400 hover:border-rose-500/30 transition-all flex items-center gap-1">';
+          h += '        <span>✓ DELIVERED</span> <span class="text-[10px] opacity-75">(Tap to Undo)</span>';
+          h += '      </button>';
+        } else {
+          h += '      <button onclick="toggleDeliveryStatus(\'' + (ord ? ord.id : '') + '\', \'' + c.id + '\', true)" class="px-4 py-2 rounded-xl text-xs font-bold bg-gray-800 text-gray-300 hover:bg-emerald-500 hover:text-white transition-all">';
+          h += '        MARK DELIVERED';
+          h += '      </button>';
+        }
+
+        h += '    </div>';
       }
-      h += '</div></div>';
+      h += '  </div>';
+      h += '</div>';
+
       return h;
+    }
+
+    function toggleDeliveryStatus(orderId, customerId, markDelivered) {
+      var ord = appState.db.orders.find(function(o){ return o.id === orderId; });
+
+      if (ord) {
+        ord.deliveryStatus = markDelivered ? 'delivered' : 'pending';
+      } else {
+        var cust = appState.db.customers.find(function(c){ return c.id === customerId; });
+        var pcs = cust ? (appState.orderShift === 'morning' ? cust.defaultMorningQty : cust.defaultEveningQty) : 100;
+        var rate = cust ? cust.unitRate : 7;
+
+        appState.db.orders.push({
+          id: 'o_' + Date.now() + '_' + customerId,
+          customerId: customerId,
+          date: appState.orderDate,
+          shift: appState.orderShift,
+          pieces: pcs,
+          unitRateApplied: rate,
+          amount: pcs * rate,
+          deliveryStatus: markDelivered ? 'delivered' : 'pending',
+          rapidoCharge: 0
+        });
+      }
+
+      saveDB(appState.db);
+      render();
     }
 
     function renderCollections() {
@@ -254,16 +592,161 @@
     }
 
     function renderExpenses() {
-      var h = '<div class="glass p-5 rounded-2xl"><h2 class="text-lg font-bold text-white mb-4">Expenses Tracker</h2><div class="space-y-3">';
-      for (var i = 0; i < appState.db.expenses.length; i++) {
-        var e = appState.db.expenses[i];
-        h += '<div class="glass-card p-3 rounded-xl flex justify-between items-center">';
-        h += '  <div><p class="font-bold text-white text-sm">' + e.category + '</p><p class="text-xs text-gray-400">' + e.date + ' • ' + (e.note || '') + '</p></div>';
-        h += '  <span class="font-bold text-rose-400 text-sm secret-number">₹' + e.amount + '</span>';
+      var categories = [
+        'Rice Flour', 'Shop Rent', 'Shop EB', 'Worker Place Rent', 
+        'Worker EB', 'Rapido / Porter', 'Generator / Fuel', 
+        'Worker Food & Snacks', 'Others'
+      ];
+
+      var totalRevenue = appState.db.orders.filter(function(o){ return o.deliveryStatus === 'delivered'; }).reduce(function(s, o){ return s + o.amount; }, 0);
+      
+      var filteredExpenses = appState.db.expenses;
+      if (appState.expenseFilterCategory !== 'all') {
+        filteredExpenses = filteredExpenses.filter(function(e){ return e.category === appState.expenseFilterCategory; });
+      }
+
+      var totalExpenses = appState.db.expenses.reduce(function(s, e){ return s + Number(e.amount || 0); }, 0);
+      var netProfit = totalRevenue - totalExpenses;
+
+      var h = '<div class="glass p-5 rounded-2xl space-y-6">';
+      
+      h += '  <div class="flex flex-wrap justify-between items-center gap-4">';
+      h += '    <div>';
+      h += '      <h2 class="text-lg font-bold text-white mb-1">Expenses & Net Profit Tracker</h2>';
+      h += '      <p class="text-xs text-gray-400">Track operational costs to see clear profit in hand.</p>';
+      h += '    </div>';
+      h += '    <button onclick="toggleExpenseModal(true)" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 font-bold text-white text-xs rounded-xl shadow-lg shadow-emerald-500/20 flex items-center gap-1.5">';
+      h += '      <span>+ Add New Expense</span>';
+      h += '    </button>';
+      h += '  </div>';
+
+      h += '  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">';
+      h += '    <div class="glass-card p-4 rounded-xl border-l-4 border-emerald-500"><p class="text-xs text-gray-400">TOTAL REVENUE</p><p class="text-2xl font-bold text-emerald-400 mt-1 secret-number">' + formatMoney(totalRevenue) + '</p></div>';
+      h += '    <div class="glass-card p-4 rounded-xl border-l-4 border-rose-500"><p class="text-xs text-gray-400">TOTAL EXPENSES</p><p class="text-2xl font-bold text-rose-400 mt-1 secret-number">' + formatMoney(totalExpenses) + '</p></div>';
+      h += '    <div class="glass-card p-4 rounded-xl border-l-4 ' + (netProfit >= 0 ? 'border-sky-500' : 'border-amber-500') + '">';
+      h += '      <p class="text-xs text-gray-400">NET PROFIT IN HAND</p>';
+      h += '      <p class="text-2xl font-bold ' + (netProfit >= 0 ? 'text-sky-400' : 'text-amber-400') + ' mt-1 secret-number">' + formatMoney(netProfit) + '</p>';
+      h += '    </div>';
+      h += '  </div>';
+
+      h += '  <div class="glass-card p-3 rounded-xl flex items-center justify-between gap-4">';
+      h += '    <span class="text-xs text-gray-400 font-bold">Filter Category:</span>';
+      h += '    <select onchange="setExpenseFilterCategory(this.value)" class="bg-gray-900 border border-gray-700 text-white text-xs rounded-xl px-3 py-1.5">';
+      h += '      <option value="all">All Categories</option>';
+      for (var c = 0; c < categories.length; c++) {
+        var cat = categories[c];
+        h += '      <option value="' + cat + '" ' + (appState.expenseFilterCategory === cat ? 'selected' : '') + '>' + cat + '</option>';
+      }
+      h += '    </select>';
+      h += '  </div>';
+
+      h += '  <div class="space-y-3">';
+      if (filteredExpenses.length === 0) {
+        h += '    <p class="text-xs text-gray-500 text-center py-6">No expense records found for this filter.</p>';
+      }
+      for (var i = 0; i < filteredExpenses.length; i++) {
+        var e = filteredExpenses[i];
+        var linkedCust = appState.db.customers.find(function(c){ return c.id === e.customerId; });
+        var shopTag = linkedCust ? ' • ' + linkedCust.name : '';
+
+        h += '    <div class="glass-card p-4 rounded-xl flex justify-between items-center gap-4">';
+        h += '      <div>';
+        h += '        <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">' + e.category + '</span>';
+        h += '        <p class="font-bold text-white text-sm mt-1.5">' + (e.note || e.category) + shopTag + '</p>';
+        h += '        <p class="text-xs text-gray-400 mt-0.5">' + e.date + '</p>';
+        h += '      </div>';
+
+        h += '      <div class="flex items-center gap-3">';
+        h += '        <span class="font-bold text-rose-400 text-base secret-number">₹' + e.amount + '</span>';
+        h += '        <button onclick="deleteExpense(\'' + e.id + '\')" title="Delete Expense" class="text-gray-500 hover:text-rose-400 p-1.5 text-xs font-bold bg-gray-800 rounded-lg">✕</button>';
+        h += '      </div>';
+        h += '    </div>';
+      }
+      h += '  </div>';
+      h += '</div>';
+
+      if (appState.showExpenseModal) {
+        h += '<div class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">';
+        h += '  <div class="glass p-6 rounded-2xl w-full max-w-md space-y-4">';
+        h += '    <h3 class="text-lg font-bold text-white">Record New Expense</h3>';
+        
+        h += '    <div>';
+        h += '      <label class="text-xs text-gray-400 font-bold block mb-1">Expense Category</label>';
+        h += '      <select id="expCategory" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">';
+        for (var k = 0; k < categories.length; k++) {
+          h += '        <option value="' + categories[k] + '">' + categories[k] + '</option>';
+        }
+        h += '      </select>';
+        h += '    </div>';
+
+        h += '    <div>';
+        h += '      <label class="text-xs text-gray-400 font-bold block mb-1">Amount (₹)</label>';
+        h += '      <input id="expAmount" type="number" placeholder="e.g. 1200" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm font-bold">';
+        h += '    </div>';
+
+        h += '    <div>';
+        h += '      <label class="text-xs text-gray-400 font-bold block mb-1">Date</label>';
+        h += '      <input id="expDate" type="date" value="' + appState.orderDate + '" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">';
+        h += '    </div>';
+
+        h += '    <div>';
+        h += '      <label class="text-xs text-gray-400 font-bold block mb-1">Link to Shop / Hotel (Optional)</label>';
+        h += '      <select id="expShop" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">';
+        h += '        <option value="">-- General / Business Expense --</option>';
+        for (var s = 0; s < appState.db.customers.length; s++) {
+          var shop = appState.db.customers[s];
+          h += '        <option value="' + shop.id + '">' + shop.name + '</option>';
+        }
+        h += '      </select>';
+        h += '    </div>';
+
+        h += '    <div>';
+        h += '      <label class="text-xs text-gray-400 font-bold block mb-1">Note / Description</label>';
+        h += '      <input id="expNote" type="text" placeholder="e.g. 50kg bag, Electric bill, Worker snacks" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">';
+        h += '    </div>';
+
+        h += '    <div class="flex justify-end gap-2 pt-2">';
+        h += '      <button onclick="toggleExpenseModal(false)" class="px-4 py-2 bg-gray-800 text-xs rounded-xl text-gray-300">Cancel</button>';
+        h += '      <button onclick="saveNewExpense()" class="px-4 py-2 bg-emerald-500 text-xs rounded-xl text-white font-bold">Save Expense</button>';
+        h += '    </div>';
+        h += '  </div>';
         h += '</div>';
       }
-      h += '</div></div>';
+
       return h;
+    }
+
+    function toggleExpenseModal(show) { appState.showExpenseModal = show; render(); }
+    function setExpenseFilterCategory(cat) { appState.expenseFilterCategory = cat; render(); }
+
+    function saveNewExpense() {
+      var category = document.getElementById('expCategory').value;
+      var amount = Number(document.getElementById('expAmount').value) || 0;
+      var date = document.getElementById('expDate').value || appState.orderDate;
+      var shopId = document.getElementById('expShop').value;
+      var note = document.getElementById('expNote').value;
+
+      if (amount <= 0) return alert("Please enter a valid expense amount.");
+
+      appState.db.expenses.push({
+        id: 'e_' + Date.now(),
+        category: category,
+        amount: amount,
+        date: date,
+        customerId: shopId,
+        note: note
+      });
+
+      saveDB(appState.db);
+      toggleExpenseModal(false);
+    }
+
+    function deleteExpense(expId) {
+      if (confirm("Are you sure you want to delete this expense entry?")) {
+        appState.db.expenses = appState.db.expenses.filter(function(e){ return e.id !== expId; });
+        saveDB(appState.db);
+        render();
+      }
     }
 
     function renderBills() {
@@ -315,38 +798,168 @@
     }
 
     function renderShops() {
-      var h = '<div class="glass p-5 rounded-2xl">';
-      h += '  <div class="flex justify-between items-center mb-6">';
-      h += '    <h2 class="text-lg font-bold text-white">Shops & Customers</h2>';
-      h += '    <button onclick="toggleModal(true)" class="px-3 py-2 bg-emerald-500 font-bold text-white text-xs rounded-xl">+ Add New Shop</button>';
+      var h = '<div class="glass p-5 rounded-2xl space-y-6">';
+      
+      h += '  <div class="flex justify-between items-center flex-wrap gap-4">';
+      h += '    <div>';
+      h += '      <h2 class="text-lg font-bold text-white mb-1">Shops & Customer Directory</h2>';
+      h += '      <p class="text-xs text-gray-400">Manage rates, WhatsApp numbers, delivery locations, and shift defaults.</p>';
+      h += '    </div>';
+      h += '    <button onclick="openAddShopModal()" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 font-bold text-white text-xs rounded-xl shadow-lg shadow-emerald-500/20">+ Add New Shop</button>';
       h += '  </div>';
+
       h += '  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
       for (var i = 0; i < appState.db.customers.length; i++) {
         var c = appState.db.customers[i];
-        h += '    <div class="glass-card p-4 rounded-xl flex justify-between items-center">';
-        h += '      <div><h3 class="font-bold text-white">' + c.name + '</h3><p class="text-xs text-gray-400">Phone: ' + c.ownerPhone + '</p><p class="text-xs text-emerald-400 mt-1">Rate: ₹' + c.unitRate + '/pc</p></div>';
-        h += '      <span class="text-xs font-bold px-2 py-1 rounded bg-emerald-500/20 text-emerald-400">' + (c.isActive ? 'Active' : 'Inactive') + '</span>';
+        
+        h += '    <div class="glass-card p-4 rounded-xl flex flex-col justify-between space-y-3">';
+        h += '      <div>';
+        h += '        <div class="flex justify-between items-start gap-2">';
+        h += '          <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">' + (c.type || 'Hotel') + '</span>';
+        h += '          <span class="text-xs font-bold px-2 py-0.5 rounded ' + (c.isActive ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400') + '">' + (c.isActive ? 'Active' : 'Inactive') + '</span>';
+        h += '        </div>';
+        
+        h += '        <h3 class="font-bold text-white text-base mt-2">' + c.name + '</h3>';
+        h += '        <p class="text-xs text-gray-300 mt-1">📱 WhatsApp: <span class="font-semibold text-white">' + c.ownerPhone + '</span></p>';
+        if (c.address) {
+          h += '        <p class="text-xs text-gray-400 mt-0.5">📍 Location: ' + c.address + '</p>';
+        }
+        h += '        <p class="text-xs text-emerald-400 font-semibold mt-1">Unit Rate: ₹' + c.unitRate + '/piece</p>';
+        h += '        <p class="text-[11px] text-gray-500 mt-0.5">Defaults: Morning ' + (c.defaultMorningQty || 100) + ' pcs | Evening ' + (c.defaultEveningQty || 50) + ' pcs</p>';
+        h += '      </div>';
+
+        h += '      <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-800/80">';
+        h += '        <button onclick="toggleShopStatus(\'' + c.id + '\')" class="px-2.5 py-1 text-xs rounded-lg font-semibold bg-gray-800 text-gray-300 hover:text-white">' + (c.isActive ? 'Deactivate' : 'Activate') + '</button>';
+        h += '        <button onclick="openEditShopModal(\'' + c.id + '\')" class="px-3 py-1 text-xs rounded-lg font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-500 hover:text-white transition-all">✏️ Edit</button>';
+        h += '        <button onclick="deleteShop(\'' + c.id + '\')" class="px-2 py-1 text-xs rounded-lg font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 hover:bg-rose-500 hover:text-white transition-all" title="Delete Shop">🗑️</button>';
+        h += '      </div>';
+
         h += '    </div>';
       }
       h += '  </div>';
       h += '</div>';
 
       if (appState.showModal) {
-        h += '<div class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">';
-        h += '  <div class="glass p-6 rounded-2xl w-full max-w-md space-y-4">';
-        h += '    <h3 class="text-lg font-bold text-white">Add New Shop</h3>';
-        h += '    <input id="shopName" type="text" placeholder="Shop Name" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">';
-        h += '    <input id="shopPhone" type="text" placeholder="Phone Number" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">';
-        h += '    <input id="shopRate" type="number" value="7" placeholder="Unit Rate" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">';
-        h += '    <div class="flex justify-end gap-2 pt-2">';
-        h += '      <button onclick="toggleModal(false)" class="px-4 py-2 bg-gray-800 text-xs rounded-xl text-gray-300">Cancel</button>';
-        h += '      <button onclick="saveShop()" class="px-4 py-2 bg-emerald-500 text-xs rounded-xl text-white font-bold">Save Shop</button>';
+        var editingCust = appState.editingShopId ? appState.db.customers.find(function(c){ return c.id === appState.editingShopId; }) : null;
+
+        h += '<div class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">';
+        h += '  <div class="glass p-6 rounded-2xl w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto">';
+        h += '    <h3 class="text-lg font-bold text-white">' + (editingCust ? 'Edit Shop Details' : 'Add New Shop') + '</h3>';
+        
+        h += '    <div>';
+        h += '      <label class="text-xs text-gray-400 font-bold block mb-1">Shop / Hotel Name</label>';
+        h += '      <input id="shopName" type="text" value="' + (editingCust ? editingCust.name : '') + '" placeholder="e.g. Hotel Annapoorna" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm font-semibold">';
+        h += '    </div>';
+
+        h += '    <div>';
+        h += '      <label class="text-xs text-gray-400 font-bold block mb-1">WhatsApp Phone Number (for Bills)</label>';
+        h += '      <input id="shopPhone" type="text" value="' + (editingCust ? editingCust.ownerPhone : '') + '" placeholder="e.g. 9842100000" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm font-semibold">';
+        h += '    </div>';
+
+        h += '    <div>';
+        h += '      <label class="text-xs text-gray-400 font-bold block mb-1">Location / Address</label>';
+        h += '      <input id="shopAddress" type="text" value="' + (editingCust && editingCust.address ? editingCust.address : '') + '" placeholder="e.g. Main Road, Bus Stand Junction" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">';
+        h += '    </div>';
+
+        h += '    <div class="grid grid-cols-2 gap-3">';
+        h += '      <div>';
+        h += '        <label class="text-xs text-gray-400 font-bold block mb-1">Unit Rate (₹)</label>';
+        h += '        <input id="shopRate" type="number" value="' + (editingCust ? editingCust.unitRate : 7) + '" placeholder="7" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm font-bold">';
+        h += '      </div>';
+        h += '      <div>';
+        h += '        <label class="text-xs text-gray-400 font-bold block mb-1">Business Type</label>';
+        h += '        <select id="shopType" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">';
+        var typeVal = editingCust ? editingCust.type : 'hotel';
+        h += '          <option value="hotel" ' + (typeVal === 'hotel' ? 'selected' : '') + '>Hotel</option>';
+        h += '          <option value="restaurant" ' + (typeVal === 'restaurant' ? 'selected' : '') + '>Restaurant</option>';
+        h += '          <option value="catering" ' + (typeVal === 'catering' ? 'selected' : '') + '>Catering</option>';
+        h += '          <option value="individual" ' + (typeVal === 'individual' ? 'selected' : '') + '>Individual</option>';
+        h += '        </select>';
+        h += '      </div>';
+        h += '    </div>';
+
+        h += '    <div class="grid grid-cols-2 gap-3">';
+        h += '      <div>';
+        h += '        <label class="text-xs text-gray-400 font-bold block mb-1">Default Morning Pcs</label>';
+        h += '        <input id="shopMornQty" type="number" value="' + (editingCust ? editingCust.defaultMorningQty : 100) + '" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">';
+        h += '      </div>';
+        h += '      <div>';
+        h += '        <label class="text-xs text-gray-400 font-bold block mb-1">Default Evening Pcs</label>';
+        h += '        <input id="shopEveQty" type="number" value="' + (editingCust ? editingCust.defaultEveningQty : 50) + '" class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm">';
+        h += '      </div>';
+        h += '    </div>';
+
+        h += '    <div class="flex justify-end gap-2 pt-3 border-t border-gray-800">';
+        h += '      <button onclick="closeShopModal()" class="px-4 py-2 bg-gray-800 text-xs rounded-xl text-gray-300">Cancel</button>';
+        h += '      <button onclick="saveShopRecord()" class="px-4 py-2 bg-emerald-500 text-xs rounded-xl text-white font-bold">' + (editingCust ? 'Update Shop' : 'Save Shop') + '</button>';
         h += '    </div>';
         h += '  </div>';
         h += '</div>';
       }
 
       return h;
+    }
+
+    function openAddShopModal() { appState.editingShopId = null; appState.showModal = true; render(); }
+    function openEditShopModal(id) { appState.editingShopId = id; appState.showModal = true; render(); }
+    function closeShopModal() { appState.showModal = false; appState.editingShopId = null; render(); }
+
+    function saveShopRecord() {
+      var name = document.getElementById('shopName').value;
+      var phone = document.getElementById('shopPhone').value;
+      var address = document.getElementById('shopAddress').value;
+      var rate = Number(document.getElementById('shopRate').value) || 7;
+      var type = document.getElementById('shopType').value;
+      var mornQty = Number(document.getElementById('shopMornQty').value) || 100;
+      var eveQty = Number(document.getElementById('shopEveQty').value) || 50;
+
+      if (!name) return alert("Please enter shop name.");
+
+      if (appState.editingShopId) {
+        var cust = appState.db.customers.find(function(c){ return c.id === appState.editingShopId; });
+        if (cust) {
+          cust.name = name;
+          cust.ownerPhone = phone || '9842100000';
+          cust.address = address;
+          cust.unitRate = rate;
+          cust.type = type;
+          cust.defaultMorningQty = mornQty;
+          cust.defaultEveningQty = eveQty;
+        }
+      } else {
+        appState.db.customers.push({
+          id: 'c' + Date.now(),
+          name: name,
+          type: type,
+          ownerPhone: phone || '9842100000',
+          address: address,
+          unitRate: rate,
+          defaultMorningQty: mornQty,
+          defaultEveningQty: eveQty,
+          isActive: true
+        });
+      }
+
+      saveDB(appState.db);
+      closeShopModal();
+    }
+
+    function toggleShopStatus(id) {
+      var cust = appState.db.customers.find(function(c){ return c.id === id; });
+      if (cust) {
+        cust.isActive = !cust.isActive;
+        saveDB(appState.db);
+        render();
+      }
+    }
+
+    function deleteShop(id) {
+      var cust = appState.db.customers.find(function(c){ return c.id === id; });
+      if (cust && confirm("Are you sure you want to delete '" + cust.name + "'? Orders and bill history for this shop will be preserved.")) {
+        appState.db.customers = appState.db.customers.filter(function(c){ return c.id !== id; });
+        saveDB(appState.db);
+        render();
+      }
     }
 
     function renderBackup() {
@@ -363,28 +976,50 @@
     // Handlers
     function switchTab(t) { appState.tab = t; render(); }
     function togglePrivacy() { appState.db.settings.hideConfidential = !appState.db.settings.hideConfidential; saveDB(appState.db); render(); }
-    function setDashShop(val) { appState.dashShop = val; render(); }
+    function setOrderDate(val) { appState.orderDate = val; render(); }
+    function setOrderShift(val) { appState.orderShift = val; render(); }
     function setBillShop(val) { appState.billShop = val; render(); }
-    function toggleModal(show) { appState.showModal = show; render(); }
 
-    function saveShop() {
-      var name = document.getElementById('shopName').value;
-      var phone = document.getElementById('shopPhone').value;
-      var rate = Number(document.getElementById('shopRate').value) || 7;
-      if (!name) return alert("Enter shop name");
+    function saveOrdersBatch() {
+      for (var i = 0; i < appState.db.customers.length; i++) {
+        var c = appState.db.customers[i];
+        if (!c.isActive) continue;
 
-      appState.db.customers.push({
-        id: 'c' + Date.now(),
-        name: name,
-        ownerPhone: phone || '9842100000',
-        unitRate: rate,
-        defaultMorningQty: 100,
-        defaultEveningQty: 50,
-        isActive: true
-      });
+        var qtyInput = document.getElementById('qty_' + c.id);
+        var rapidoInput = document.getElementById('rapido_' + c.id);
+
+        var pcs = qtyInput ? (Number(qtyInput.value) || 0) : 0;
+        var rapido = rapidoInput ? (Number(rapidoInput.value) || 0) : 0;
+
+        if (pcs > 0) {
+          appState.db.orders.push({
+            id: 'o_' + Date.now() + '_' + c.id,
+            customerId: c.id,
+            date: appState.orderDate,
+            shift: appState.orderShift,
+            pieces: pcs,
+            unitRateApplied: c.unitRate,
+            amount: pcs * c.unitRate,
+            deliveryStatus: 'delivered',
+            rapidoCharge: rapido
+          });
+
+          if (rapido > 0) {
+            appState.db.expenses.push({
+              id: 'e_' + Date.now() + '_' + c.id,
+              category: 'Rapido / Porter',
+              amount: rapido,
+              date: appState.orderDate,
+              customerId: c.id,
+              note: 'Delivery fee for ' + c.name + ' (' + appState.orderShift + ')'
+            });
+          }
+        }
+      }
 
       saveDB(appState.db);
-      toggleModal(false);
+      alert("Shift orders and delivery expenses saved successfully!");
+      render();
     }
 
     function shareWhatsApp(name, phone, pcs, amt) {
