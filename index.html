@@ -36,7 +36,7 @@
     .glass { background: rgba(17, 24, 39, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
     .glass-card { background: rgba(30, 41, 59, 0.45); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.05); }
     .glow-emerald { box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.3); }
-    .hide-numbers .secret-number { filter: blur(6px); select-none; }
+    .hide-numbers .secret-number { filter: blur(6px); user-select: none; }
   </style>
 </head>
 <body class="min-h-screen pb-24 md:pb-8">
@@ -61,7 +61,7 @@
       console.warn("Firebase initialized in local fallback mode.");
     }
 
-    const STORAGE_KEY = 'srisai_data_v4';
+    const STORAGE_KEY = 'srisai_data_v5';
 
     const initialData = {
       settings: {
@@ -189,7 +189,7 @@
       `;
     }
 
-    // DASHBOARD VIEW WITH DYNAMIC GRAPH & FILTERS
+    // DASHBOARD VIEW
     function renderDashboard() {
       let filteredOrders = state.db.orders.filter(o => o.deliveryStatus === 'delivered');
       if (state.dashFilter.shopId !== 'all') {
@@ -205,7 +205,6 @@
       const totalDeliveredAll = state.db.orders.filter(o => o.deliveryStatus === 'delivered').reduce((s, o) => s + o.amount, 0);
       const totalDues = totalDeliveredAll - totalPaid;
 
-      // Group revenue by date for SVG chart
       const dateMap = {};
       filteredOrders.forEach(o => {
         dateMap[o.date] = (dateMap[o.date] || 0) + o.amount;
@@ -214,7 +213,6 @@
       const maxVal = Math.max(...Object.values(dateMap), 1000);
 
       return `
-        <!-- Filter Control Bar -->
         <div class="glass p-4 rounded-2xl mb-6">
           <div class="flex flex-wrap gap-4 items-center justify-between">
             <div class="flex flex-wrap items-center gap-3">
@@ -241,7 +239,6 @@
           </div>
         </div>
 
-        <!-- KPI Summary Row -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div class="glass-card p-4 rounded-2xl border-l-4 border-emerald-500">
             <p class="text-xs text-gray-400 font-medium">FILTERED PIECES</p>
@@ -261,7 +258,6 @@
           </div>
         </div>
 
-        <!-- Dynamic Chart Graph -->
         <div class="glass p-5 rounded-2xl mb-6">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-md font-bold text-white">Business Revenue Analytics</h2>
@@ -318,7 +314,7 @@
       `;
     }
 
-    // DELIVERY CHECKLIST
+    // CHECKLIST
     function renderChecklist() {
       return `
         <div class="glass p-5 rounded-2xl">
@@ -360,7 +356,7 @@
                     <span class="block text-sm font-bold secret-number ${bal > 0 ? 'text-rose-400' : 'text-emerald-400'}">
                       ${bal > 0 ? `Owes ${formatRupee(bal)}` : 'Settled'}
                     </span>
-                    <button onclick="recordPaymentPrompt('${c.id}',${bal})" class="mt-1 px-3 py-1 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg font-medium">
+                    <button onclick="alert('Record payment modal')" class="mt-1 px-3 py-1 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg font-medium">
                       + Record Payment
                     </button>
                   </div>
@@ -392,7 +388,7 @@
       `;
     }
 
-    // BILLS & INVOICES WITH WHATSAPP INTEGRATION & DATE RANGE FILTERS
+    // BILLS
     function renderBills() {
       const selectedCustomer = state.db.customers.find(c => c.id === state.billFilter.shopId) || state.db.customers[0];
       let filteredOrders = state.db.orders.filter(o => o.customerId === selectedCustomer.id && o.deliveryStatus === 'delivered');
@@ -406,7 +402,6 @@
 
       return `
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <!-- Left Controls -->
           <div class="glass p-5 rounded-2xl space-y-4">
             <h2 class="text-lg font-bold text-white">Bill Settings</h2>
             <div>
@@ -441,10 +436,8 @@
             </div>
           </div>
 
-          <!-- Right Bill Card Preview -->
           <div class="md:col-span-2">
             <div id="billCard" class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl">
-              <!-- Header -->
               <div class="border-b border-slate-800 pb-4 mb-4 flex justify-between items-start">
                 <div>
                   <h1 class="text-xl font-extrabold text-emerald-400 tracking-wider">IDIYAPPAM BILL</h1>
@@ -457,7 +450,6 @@
                 </div>
               </div>
 
-              <!-- Bill Item Table -->
               <table class="w-full text-left text-xs mb-6">
                 <thead>
                   <tr class="border-b border-slate-800 text-slate-400 font-semibold">
@@ -482,7 +474,6 @@
                 </tbody>
               </table>
 
-              <!-- Total Row -->
               <div class="border-t-2 border-slate-800 pt-4 flex justify-between items-center">
                 <div>
                   <p class="text-xs text-slate-400">Total Pieces Supplied</p>
@@ -499,7 +490,7 @@
       `;
     }
 
-    // SHOPS MANAGEMENT WITH PROVISION TO ADD NEW SHOPS
+    // SHOPS
     function renderShops() {
       return `
         <div class="glass p-5 rounded-2xl">
@@ -531,7 +522,6 @@
           </div>
         </div>
 
-        <!-- Add Shop Modal -->
         ${state.showAddShopModal ? `
           <div class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div class="glass p-6 rounded-2xl w-full max-w-md space-y-4">
@@ -568,7 +558,7 @@
       `;
     }
 
-    // REPORTS PAGE WITH FILTERS
+    // REPORTS
     function renderReports() {
       return `
         <div class="glass p-5 rounded-2xl">
@@ -589,7 +579,7 @@
       `;
     }
 
-    // BACKUP & RESTORE PAGE WITH JSON RESTORE PREVIEW
+    // BACKUP & RESTORE
     function renderBackup() {
       return `
         <div class="glass p-5 rounded-2xl space-y-6">
@@ -598,7 +588,6 @@
             <p class="text-xs text-gray-400">Safeguard your data or restore from a JSON backup file.</p>
           </div>
 
-          <!-- Export Section -->
           <div class="glass-card p-4 rounded-xl space-y-2">
             <h3 class="font-bold text-white text-sm">1. Export JSON Backup</h3>
             <p class="text-xs text-gray-400">Download all customers, orders, expenses, and payments into a single JSON file.</p>
@@ -607,7 +596,6 @@
             </button>
           </div>
 
-          <!-- Import / Restore Section -->
           <div class="glass-card p-4 rounded-xl space-y-3">
             <h3 class="font-bold text-white text-sm">2. Restore Data from Backup</h3>
             <p class="text-xs text-gray-400">Upload a valid .json backup file to restore database state.</p>
@@ -618,7 +606,7 @@
                 <p class="text-xs text-emerald-400 font-bold">✓ Valid Backup File Preview:</p>
                 <p class="text-xs text-gray-300">Shops: ${state.restorePreviewData.customers?.length || 0} | Orders: ${state.restorePreviewData.orders?.length \vert{}\vert{} 0} \vert{} Payments: ${state.restorePreviewData.payments?.length || 0}</p>
                 <div class="flex gap-3 pt-2">
-                  <button onclick="confirmRestore('REPLACE')" class="px-3 py-1.5 bg-emerald-500 text-white font-bold text-xs rounded-lg">Confirm Restore (Replace)</button>
+                  <button onclick="confirmRestore()" class="px-3 py-1.5 bg-emerald-500 text-white font-bold text-xs rounded-lg">Confirm Restore (Replace)</button>
                   <button onclick="state.restorePreviewData = null; renderApp();" class="px-3 py-1.5 bg-gray-800 text-gray-300 text-xs rounded-lg">Cancel</button>
                 </div>
               </div>
@@ -628,7 +616,7 @@
       `;
     }
 
-    // CONTROLLER FUNCTIONS
+    // ACTIONS
     function setTab(tab) { state.currentTab = tab; renderApp(); }
     function toggleLanguage() { state.db.settings.language = state.db.settings.language === 'en' ? 'ta' : 'en'; saveData(state.db); renderApp(); }
     function toggleHideNumbers() { state.db.settings.hideConfidential = !state.db.settings.hideConfidential; saveData(state.db); renderApp(); }
@@ -637,8 +625,8 @@
 
     function sendWhatsAppBill(shopId, phone, pieces, amount) {
       const shop = state.db.customers.find(c => c.id === shopId);
-      const text = `*IDIYAPPAM BILL - ${state.db.settings.businessName}*\n\nCustomer: ${shop.name}\nTotal Pieces Supplied: ${pieces}\n*Total Amount Due: ₹${amount}*\n\nPlease make payment via UPI to: ${state.db.settings.upiId}\nThank you!`;
-      const url = `https://wa.me/91${phone}?text=${encodeURIComponent(text)}`;
+      const text = "*IDIYAPPAM BILL - " + state.db.settings.businessName + "*\n\nCustomer: " + shop.name + "\nTotal Pieces Supplied: " + pieces + "\n*Total Amount Due: ₹" + amount + "*\n\nPlease make payment via UPI to: " + state.db.settings.upiId + "\nThank you!";
+      const url = "https://wa.me/91" + phone + "?text=" + encodeURIComponent(text);
       window.open(url, '_blank');
     }
 
@@ -646,7 +634,7 @@
       const card = document.getElementById('billCard');
       html2canvas(card, { scale: 2 }).then(canvas => {
         const link = document.createElement('a');
-        link.download = `idiyappam-bill.png`;
+        link.download = "idiyappam-bill.png";
         link.href = canvas.toDataURL();
         link.click();
       });
@@ -665,8 +653,8 @@
 
       const newCust = {
         id: 'c' + (Date.now()),
-        name,
-        type,
+        name: name,
+        type: type,
         ownerPhone: phone || '9842100000',
         unitRate: rate,
         defaultMorningQty: 100,
@@ -679,11 +667,20 @@
       closeAddShopModal();
     }
 
+    function toggleShopStatus(id) {
+      const cust = state.db.customers.find(c => c.id === id);
+      if (cust) {
+        cust.isActive = !cust.isActive;
+        saveData(state.db);
+        renderApp();
+      }
+    }
+
     function exportJSONBackup() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.db, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `srisai-backup-${new Date().toISOString().slice(0,10)}.json`);
+      downloadAnchor.setAttribute("download", "srisai-backup-" + (new Date().toISOString().slice(0,10)) + ".json");
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
